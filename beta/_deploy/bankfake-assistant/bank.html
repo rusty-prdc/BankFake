@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BankFake">
+<title>BankFake Pro</title>
+<link rel="apple-touch-icon" href="bankfake.png">
+<link rel="icon" type="image/png" href="bankfake.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="bank.css?v=3">
+<link rel="stylesheet" href="assistant.css?v=3">
+</head>
+<body>
+
+<div id="consent-overlay" class="consent-overlay hidden">
+    <div class="consent-card">
+        <div class="consent-logo"><i class="fa-solid fa-shield-halved"></i></div>
+        <h1 class="consent-title">Добро пожаловать в BankFake</h1>
+        <p class="consent-subtitle">Перед началом работы, пожалуйста, ознакомьтесь с правилами</p>
+        <div class="consent-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div class="consent-warning-text"><b>BankFake — это игра.</b> Приложение не является банком, не предоставляет финансовых услуг и не связано с реальными деньгами.</div>
+        </div>
+        <div class="consent-scroll">
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-circle-info"></i> 1. О приложении</div><div class="consent-section-text">BankFake — игровой симулятор банковского приложения. Все карты, счета, переводы, вклады, кредиты, акции и операции — <b>виртуальные</b>.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-scale-balanced"></i> 2. Правила использования</div><div class="consent-section-text">Не выдавать виртуальные операции за реальные; не использовать приложение для обмана третьих лиц; понимать, что это <b>развлечение и симулятор</b>.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-lock"></i> 3. Приватность и данные</div><div class="consent-section-text">Все данные хранятся <b>только на вашем устройстве</b> в localStorage.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-user-lock"></i> 4. Разрешения</div><div class="consent-section-text">Доступ к файлам (для аватара) и локальное хранилище. Больше ничего.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-ban"></i> 5. Отказ от ответственности</div><div class="consent-section-text">Приложение распространяется «как есть». Разработчик <b>не несёт ответственности</b> за последствия.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-user-check"></i> 6. Возрастные ограничения</div><div class="consent-section-text">Для пользователей <b>12 лет и старше</b>.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-copyright"></i> 7. Интеллектуальная собственность</div><div class="consent-section-text">Все элементы — собственность разработчика. Названия — <b>вымышленные</b>.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-gamepad"></i> 8. Игровая экономика</div><div class="consent-section-text">Все операции и награды <b>игровые</b>.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-rotate"></i> 9. Изменения условий</div><div class="consent-section-text">Разработчик может менять условия в любой момент.</div></div>
+            <div class="consent-section"><div class="consent-section-title"><i class="fa-solid fa-gavel"></i> 10. Правовая оговорка</div><div class="consent-section-text">BankFake не является финансовой организацией.</div></div>
+        </div>
+        <label class="consent-checkbox-block" id="consent-checkbox-block" onclick="toggleConsentCheck()">
+            <input type="checkbox" id="consent-checkbox">
+            <span class="consent-checkbox"><i class="fa-solid fa-check"></i></span>
+            <span class="consent-checkbox-label">Я прочитал(а) все 10 разделов и согласен(на). Я понимаю, что <b>BankFake — это игра</b>.</span>
+        </label>
+        <button class="consent-btn" id="consent-btn" disabled onclick="acceptConsent()"><i class="fa-solid fa-check mr-2"></i>Принять и продолжить</button>
+        <div class="consent-decline" onclick="declineConsent()">Отказаться и выйти</div>
+        <div class="consent-footer">© 2026 BankFake · v2.1.0 · Игровой симулятор<br>Не является финансовой организацией</div>
+    </div>
+</div>
+
+<div class="app-container" id="app">
+    <div id="alert-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-[1000] bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-2xl text-sm font-medium">Сообщение</div>
+
+    <div id="push-banner" class="push-banner">
+        <div class="push-banner-icon"><i class="fa-solid fa-building-columns"></i></div>
+        <div style="flex:1;min-width:0;">
+            <div class="push-banner-title">BankFake</div>
+            <div class="push-banner-text" id="push-banner-text">—</div>
+        </div>
+        <div class="push-banner-time" id="push-banner-time">сейчас</div>
+    </div>
+
+    <div class="main-scroll no-scrollbar" id="main-scroll">
+
+        <!-- ГЛАВНАЯ -->
+        <div id="tab-main" class="tab-content active">
+            <div class="main-header">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <div id="header-avatar-container" class="w-11 h-11 flex-shrink-0">
+                        <div class="w-full h-full bg-slate-200 rounded-full flex items-center justify-center overflow-hidden cursor-pointer animate-press" onclick="openSettings()" id="header-avatar-wrapper">
+                            <img id="user-avatar-main" src="" class="w-full h-full object-cover hidden">
+                            <i id="user-icon-placeholder" class="fa-solid fa-user text-slate-500 text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 search-bar">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+                        <input type="text" id="global-search" placeholder="Поиск">
+                    </div>
+                    <div class="relative cursor-pointer animate-press p-2" onclick="openNotifications()">
+                        <i class="fa-solid fa-bell text-slate-500 text-xl"></i>
+                        <span id="notif-dot" class="absolute top-1 right-1 w-2.5 h-2.5 bg-orange-500 border-2 border-white rounded-full"></span>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-bold flex items-center flex-wrap">
+                    <span id="display-name">—</span>
+                    <span id="pro-badge-main" class="hidden"></span>
+                </h1>
+            </div>
+
+            <div class="wallet-header" id="balance-block">
+                <div class="title">Баланс</div>
+                <div class="text-2xl font-black text-emerald-600"><span id="main-balance">0</span> ₽</div>
+            </div>
+
+            <div class="quick-actions" id="quick-actions-tour">
+                <button class="quick-action" onclick="promptTopupCard()">
+                    <div class="qa-icon" style="background:#d1fae5;color:#10b981"><i class="fa-solid fa-plus"></i></div>
+                    <span>Пополнить</span>
+                </button>
+                <button class="quick-action" onclick="switchTab('payments')">
+                    <div class="qa-icon" style="background:#dbeafe;color:#2563eb"><i class="fa-solid fa-paper-plane"></i></div>
+                    <span>Перевести</span>
+                </button>
+                <button class="quick-action" onclick="switchTab('history')">
+                    <div class="qa-icon" style="background:#fef3c7;color:#f59e0b"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <span>История</span>
+                </button>
+                <button class="quick-action" onclick="openAddCard()">
+                    <div class="qa-icon" style="background:#ede9fe;color:#8b5cf6"><i class="fa-solid fa-credit-card"></i></div>
+                    <span>Новая карта</span>
+                </button>
+            </div>
+
+            <div class="wallet-header">
+                <div class="title">Кошелёк <i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+            <div class="wallet-layout" id="wallet-layout">
+                <button class="bfpay-vertical-btn" id="bfpay-btn-tour" onclick="openBFPay()">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>BF<br>PAY</span>
+                </button>
+                <div class="wallet-points-square" id="points-block-tour" onclick="switchTab('shop')">
+                    <i class="fa-solid fa-star"></i>
+                    <span class="points-label">БАЛЛЫ</span>
+                    <span class="points-value" id="points-balance">0</span>
+                </div>
+                <div id="wallet-cards-container" class="flex gap-3"></div>
+                <button class="wallet-add-card" onclick="openAddCard()">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>ДОБАВИТЬ</span>
+                </button>
+            </div>
+
+            <div class="history-preview" id="history-preview-tour">
+                <div class="history-preview-header">
+                    <h3>История</h3>
+                    <a onclick="switchTab('history')">Все</a>
+                </div>
+                <div id="main-history-preview" class="space-y-1 px-2"></div>
+            </div>
+
+            <div class="services-section" id="services-tour">
+                <h3>Сервисы</h3>
+                <div class="services-grid">
+                    <button class="service-card" onclick="openProducts()">
+                        <div class="s-icon" style="background:#d1fae5;color:#10b981"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="s-title">Вклады<br>и копилки</div>
+                        <div class="s-sub">продукты</div>
+                    </button>
+                    <button class="service-card" onclick="openCredit()">
+                        <div class="s-icon" style="background:#dbeafe;color:#2563eb"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                        <div class="s-title">Кредит</div>
+                        <div class="s-sub">до 1 000 000 ₽</div>
+                    </button>
+                    <button class="service-card" onclick="openMortgage()">
+                        <div class="s-icon" style="background:#ccfbf1;color:#0d9488"><i class="fa-solid fa-house-chimney"></i></div>
+                        <div class="s-title">Ипотека</div>
+                        <div class="s-sub">до 10 млн ₽</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПЛАТЕЖИ -->
+        <div id="tab-payments" class="tab-content">
+            <div class="p-6 pt-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">Платежи</h1>
+                    <i onclick="openAddContactModal()" class="fa-solid fa-plus text-emerald-600 text-xl cursor-pointer animate-press"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Оплатить</p>
+                <div class="pay-grid mb-8" id="pay-tiles-container"></div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Переводы</p>
+                <div class="space-y-3 mb-8">
+                    <div onclick="openForeignTransfer()" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl cursor-pointer animate-press">
+                        <div class="w-12 h-12 bg-indigo-500 text-white rounded-2xl flex items-center justify-center"><i class="fa-solid fa-globe text-xl"></i></div>
+                        <div><p class="font-bold text-slate-700">Перевод за границу</p><p class="text-[10px] text-slate-400">+5% баллов</p></div>
+                    </div>
+                    <div onclick="openRequisites()" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl cursor-pointer animate-press">
+                        <div class="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center"><i class="fa-solid fa-address-card text-xl"></i></div>
+                        <div><p class="font-bold text-slate-700">Мои реквизиты</p><p class="text-[10px] text-slate-400">поделиться с другими</p></div>
+                    </div>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Контакты</p>
+                <div id="contacts-list" class="space-y-1"></div>
+            </div>
+        </div>
+
+        <!-- ИСТОРИЯ -->
+        <div id="tab-history" class="tab-content">
+            <div class="p-6 pt-12 border-b flex justify-between items-center sticky top-0 z-10" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(12px);">
+                <h1 class="text-2xl font-bold">История</h1>
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-chart-pie text-emerald-600 text-xl cursor-pointer animate-press" onclick="toggleChartView()"></i>
+                    <i onclick="askConfirm('Очистить историю?', 'Все записи будут удалены.', clearAllHistoryNow, 'danger')" class="fa-solid fa-trash-can text-slate-400 text-xl cursor-pointer animate-press"></i>
+                </div>
+            </div>
+            <div id="chart-block" class="mx-4 my-4 bg-white rounded-3xl p-4 shadow-sm hidden">
+                <h3 class="text-sm font-bold mb-3 text-center">Расходы по категориям</h3>
+                <canvas id="expenses-chart" width="300" height="300" style="max-width:280px;margin:0 auto;display:block;"></canvas>
+                <div id="chart-legend" class="flex flex-wrap gap-3 justify-center mt-4 text-xs"></div>
+            </div>
+            <div class="p-3">
+                <input type="text" id="history-search" placeholder="Поиск по истории" class="w-full bg-slate-100 rounded-xl py-2 px-4 pl-10 text-sm mb-3">
+                <div class="flex gap-2 overflow-x-auto pb-3 no-scrollbar" id="history-filters">
+                    <button class="history-filter-btn active" data-filter="all">Всё</button>
+                    <button class="history-filter-btn" data-filter="income">Пополнения</button>
+                    <button class="history-filter-btn" data-filter="expense">Расходы</button>
+                    <button class="history-filter-btn" data-filter="transfer">Переводы</button>
+                    <button class="history-filter-btn" data-filter="payment">Платежи</button>
+                </div>
+                <div id="history-list" class="space-y-4 pb-24"></div>
+            </div>
+        </div>
+
+        <!-- КАРТЫ -->
+        <div id="tab-cards" class="tab-content">
+            <div class="p-6 pt-12">
+                <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-2xl font-bold">Мои карты</h1>
+                    <button id="cards-add-btn" onclick="openAddCard()" class="bg-emerald-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md animate-press"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <p class="text-xs text-slate-400 mb-6">Вращайте карту в 3D</p>
+            </div>
+            <div class="relative px-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="carousel-control" onclick="prevCard()"><i class="fa-solid fa-chevron-left text-slate-600"></i></div>
+                    <div class="flex-1 card-3d-container"><div id="active-card-3d" class="card-3d"></div></div>
+                    <div class="carousel-control" onclick="nextCard()"><i class="fa-solid fa-chevron-right text-slate-600"></i></div>
+                </div>
+                <div id="card-dots" class="flex justify-center gap-2 mt-4 mb-2"></div>
+            </div>
+            <div class="mx-5 mt-4 p-5 bg-white rounded-3xl shadow-sm border border-slate-100">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Данные карты</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="text-slate-400 text-xs">Номер</span><span id="details-card-number" class="font-mono font-bold"></span></div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="text-slate-400 text-xs">CVV</span><span id="details-cvv" class="font-mono font-bold cursor-pointer" onclick="toggleCVV()">•••</span></div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="text-slate-400 text-xs">Владелец</span><span id="details-holder" class="font-bold uppercase"></span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-400 text-xs">Срок</span><span id="details-expiry" class="font-mono font-bold"></span></div>
+                </div>
+            </div>
+            <div class="mx-5 mt-4 p-5 bg-emerald-50 rounded-3xl">
+                <p class="text-[10px] text-emerald-600 uppercase font-bold">Баланс карты</p>
+                <p class="text-2xl font-black"><span id="details-balance">0</span> ₽</p>
+                <p class="text-[10px] text-emerald-600 mt-1">Лимит: <span id="details-topup-limit">10 000</span> ₽</p>
+            </div>
+            <div class="card-actions-row">
+                <button class="card-action-btn action-topup" onclick="promptTopupCard()"><i class="fa-solid fa-plus"></i><span>Пополнить</span></button>
+                <button class="card-action-btn action-design" onclick="openCardDesign()"><i class="fa-solid fa-palette"></i><span>Дизайн</span></button>
+                <button class="card-action-btn action-block" onclick="toggleCardBlock()"><i class="fa-solid fa-lock"></i><span>Блок.</span></button>
+                <button class="card-action-btn action-delete" onclick="confirmDeleteCard()"><i class="fa-solid fa-trash-can"></i><span>Удалить</span></button>
+            </div>
+        </div>
+
+        <!-- МАГАЗИН -->
+        <div id="tab-shop" class="tab-content">
+            <div class="shop-header">
+                <div class="flex justify-between items-center">
+                    <div class="title">Магазин</div>
+                    <i onclick="switchTab('main')" class="fa-solid fa-xmark text-2xl text-amber-900 cursor-pointer p-2"></i>
+                </div>
+                <div class="balance"><i class="fa-solid fa-star"></i> <span id="shop-points">0</span> баллов</div>
+            </div>
+            <div class="limits-info">
+                <div class="limit-card topup"><div class="lbl">Лимит пополнения</div><div class="val"><span id="limit-topup">10 000</span> ₽</div></div>
+                <div class="limit-card salary"><div class="lbl">Лимит зарплаты</div><div class="val"><span id="limit-salary">5 000</span> ₽</div></div>
+            </div>
+            <div class="shop-grid" id="shop-grid"></div>
+        </div>
+
+        <!-- ПРОФИЛЬ -->
+        <div id="tab-profile" class="tab-content">
+            <div class="pt-12 pb-4">
+                <div class="px-6 mb-4"><h1 class="text-2xl font-bold">Профиль</h1></div>
+                <div class="profile-header">
+                    <div id="profile-avatar-wrapper">
+                        <div class="profile-avatar" id="profile-avatar-box">
+                            <img id="user-avatar-profile" src="" class="hidden">
+                            <span id="profile-avatar-initials">?</span>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name"><span id="profile-name">—</span><span id="pro-badge-profile" class="hidden"></span></div>
+                        <div class="profile-id" id="profile-id-display">ID: —</div>
+                    </div>
+                    <button class="profile-edit-btn" onclick="openSettings()">Изменить</button>
+                </div>
+            </div>
+            <div id="pro-block-container"></div>
+            <h3 class="text-sm font-bold text-slate-500 px-6 mt-4 mb-2">Настройки</h3>
+            <div class="settings-card">
+                <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-moon"></i><span>Тёмная тема</span></div><label class="toggle"><input type="checkbox" id="set-dark-theme"><span class="toggle-slider"></span></label></div>
+                <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-bell"></i><span>Уведомления</span></div><label class="toggle"><input type="checkbox" id="set-notifications" checked><span class="toggle-slider"></span></label></div>
+                <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-tower-broadcast"></i><span>Push-уведомления</span></div><label class="toggle"><input type="checkbox" id="set-push" checked onchange="togglePush(this.checked)"><span class="toggle-slider"></span></label></div>
+                <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-mobile-screen"></i><span>Виброотклик</span></div><label class="toggle"><input type="checkbox" id="set-vibrate" checked onchange="toggleVibrate(this.checked)"><span class="toggle-slider"></span></label></div>
+                <div class="setting-row" onclick="openRequisites()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-address-card"></i><span>Мои реквизиты</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
+                <div class="setting-row" onclick="startTutorial()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-graduation-cap"></i><span>Показать обучение</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
+                <div class="setting-row" onclick="showConsentAgain()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-file-contract"></i><span>Соглашение и правила</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
+                <div class="setting-row" onclick="openSettings()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-gear"></i><span>Настройки зарплаты и карт</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
+            </div>
+            <h3 class="text-sm font-bold text-slate-500 px-6 mt-6 mb-2">Баллы</h3>
+            <div class="mx-4 mb-6 p-5 bg-gradient-to-br from-amber-100 to-amber-200 rounded-3xl flex items-center justify-between">
+                <div><p class="text-[10px] font-bold text-amber-800 uppercase tracking-wide">Баланс баллов</p><p class="text-3xl font-black text-amber-900"><span id="profile-points">0</span></p></div>
+                <button onclick="switchTab('shop')" class="bg-white text-amber-700 px-4 py-2 rounded-2xl font-bold text-sm shadow animate-press">В магазин →</button>
+            </div>
+            <h3 class="text-sm font-bold text-slate-500 px-6 mt-6 mb-2">Опасная зона</h3>
+            <div class="mx-4 mb-8">
+                <button onclick="askConfirm('Сбросить все данные?', 'Всё будет удалено безвозвратно.', doResetData, 'danger')" class="w-full p-4 bg-red-50 text-red-500 rounded-2xl font-bold text-sm animate-press"><i class="fa-solid fa-trash-can mr-2"></i> Сбросить все данные</button>
+            </div>
+        </div>
+
+        <!-- АССИСТЕНТ -->
+        <div id="tab-assistant" class="tab-content">
+            <div class="bf-as">
+                <div class="bf-as-header">
+                    <div class="bf-as-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bf-as-titles">
+                        <h1><i class="fa-solid fa-wand-magic-sparkles"></i> Ассистент</h1>
+                        <p>Ваш помощник в BankFake</p>
+                    </div>
+                    <button class="bf-as-new bf-as-new-text" onclick="BFA.clearChat()" title="Очистить чат" aria-label="Очистить чат">
+                        <i class="fa-solid fa-broom"></i><span>Очистить чат</span>
+                    </button>
+                </div>
+
+                <div class="bf-as-quick">
+                    <button class="bf-as-chip" onclick="BFA.quick('balance')">💰 Мой баланс</button>
+                    <button class="bf-as-chip" onclick="BFA.quick('last')">📜 Последние операции</button>
+                    <button class="bf-as-chip" onclick="BFA.quick('cards')">💳 Мои карты</button>
+                    <button class="bf-as-chip" onclick="BFA.quick('points')">⭐ Мои баллы</button>
+                    <button class="bf-as-chip" onclick="BFA.quick('salary')">💵 Зарплата</button>
+                    <button class="bf-as-chip" onclick="BFA.quick('forecast')">🔮 Прогноз</button>
+                </div>
+
+                <div class="bf-as-messages" id="bf-as-messages" role="log" aria-live="polite"></div>
+
+                <div class="bf-as-inputbar">
+                    <input id="bf-as-input" class="bf-as-input" type="text" placeholder="Спросите ассистента..." maxlength="4000" autocomplete="off" enterkeyhint="send" aria-label="Сообщение ассистенту">
+                    <button id="bf-as-send" class="bf-as-send" onclick="BFA.send()" aria-label="Отправить"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button onclick="switchTab('main')" class="nav-item active-nav flex flex-col items-center gap-1" data-tab="main"><i class="fa-solid fa-house-chimney text-xl"></i><span class="text-[10px] font-bold">Главная</span></button>
+        <button onclick="switchTab('cards')" class="nav-item flex flex-col items-center gap-1" data-tab="cards"><i class="fa-solid fa-credit-card text-xl"></i><span class="text-[10px] font-bold">Карты</span></button>
+        <button onclick="switchTab('assistant')" class="nav-item flex flex-col items-center gap-1" data-tab="assistant"><i class="fa-solid fa-robot text-xl"></i><span class="text-[10px] font-bold">Ассистент</span></button>
+        <button onclick="switchTab('history')" class="nav-item flex flex-col items-center gap-1" data-tab="history"><i class="fa-solid fa-clock-rotate-left text-xl"></i><span class="text-[10px] font-bold">История</span></button>
+        <button onclick="switchTab('payments')" class="nav-item flex flex-col items-center gap-1" data-tab="payments"><i class="fa-solid fa-paper-plane text-xl"></i><span class="text-[10px] font-bold">Платежи</span></button>
+        <button onclick="switchTab('profile')" class="nav-item flex flex-col items-center gap-1" data-tab="profile"><i class="fa-solid fa-user text-xl"></i><span class="text-[10px] font-bold">Профиль</span></button>
+    </div>
+
+    <!-- МОДАЛКИ -->
+    <div id="modal-products" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(12px);">
+        <i onclick="closeModal('modal-products')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold text-lg">Продукты</span><div class="w-8"></div>
+      </div>
+      <div class="p-4 pb-32">
+        <div class="prod-tabs">
+          <button class="prod-tab active" data-prod="deposits" onclick="switchProdTab('deposits')"><i class="fa-solid fa-piggy-bank"></i>Вклады</button>
+          <button class="prod-tab" data-prod="piggies" onclick="switchProdTab('piggies')"><i class="fa-solid fa-bullseye"></i>Копилки</button>
+          <button class="prod-tab" data-prod="stocks" onclick="switchProdTab('stocks')"><i class="fa-solid fa-chart-line"></i>Акции</button>
+        </div>
+        <div id="prod-content"></div>
+      </div>
+    </div>
+
+    <div id="modal-service" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(12px);">
+        <i onclick="closeModal('modal-service')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold text-lg" id="service-title">Оплата услуги</span>
+        <div class="w-8"></div>
+      </div>
+      <div class="p-6 pb-32 space-y-5">
+        <div class="flex items-center gap-4 p-5 rounded-3xl border bg-slate-50">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" id="service-header-icon"></div>
+            <div><p class="font-bold text-lg" id="service-header-name">—</p><p class="text-xs text-slate-500" id="service-header-desc">—</p></div>
+        </div>
+        <div><label class="text-[10px] font-bold text-slate-400 uppercase">Провайдер</label><div class="grid grid-cols-1 gap-2 mt-2" id="service-providers"></div></div>
+        <div><label class="text-[10px] font-bold text-slate-400 uppercase">Сумма (₽)</label><input id="service-am" type="number" placeholder="0" class="w-full bg-slate-50 p-5 rounded-2xl mt-2 font-bold text-2xl"></div>
+        <div><label class="text-[10px] font-bold text-slate-400 uppercase">Карта списания</label><select id="service-card" class="w-full bg-slate-50 p-4 rounded-2xl mt-2 font-bold"></select></div>
+        <button onclick="confirmServicePay()" class="w-full bg-emerald-500 text-white py-5 rounded-3xl font-bold text-lg shadow-xl animate-press">Оплатить</button>
+      </div>
+    </div>
+
+    <div id="modal-bfpay" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex justify-between items-center border-b" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(12px);">
+        <i onclick="closeBFPay()" class="fa-solid fa-xmark text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold text-lg">BF-Pay</span><div class="w-8"></div>
+      </div>
+      <div id="bfpay-step1" class="p-6 pb-24">
+        <div class="text-center mb-3">
+          <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-3">Сумма платежа</p>
+          <div class="flex items-center justify-center gap-2">
+            <span class="text-4xl font-black text-slate-800">₽</span>
+            <input id="bf-am" type="number" placeholder="0" oninput="updateBFPayPreview()" class="bfpay-amount-input" style="max-width: 200px;">
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2 mb-6">
+          <button type="button" class="bfpay-quick-btn" onclick="setBFAmount(100)">100</button>
+          <button type="button" class="bfpay-quick-btn" onclick="setBFAmount(500)">500</button>
+          <button type="button" class="bfpay-quick-btn" onclick="setBFAmount(1000)">1 000</button>
+          <button type="button" class="bfpay-quick-btn" onclick="setBFAmount(5000)">5 000</button>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider">Категория</p>
+        <div class="grid grid-cols-4 gap-2 mb-6" id="bf-categories-container"></div>
+        <p class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider">Способ оплаты</p>
+        <select id="bfpay-card" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mb-6"></select>
+        <p class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider">Недавние</p>
+        <div class="mb-6" id="bf-recent-container"></div>
+        <button type="button" class="pay-button" onclick="bfpayStep2()"><i class="fa-solid fa-fingerprint text-2xl"></i> Оплатить</button>
+      </div>
+      <div id="bfpay-step2" class="hidden p-6 pb-24">
+        <div class="receipt-card mb-8">
+          <div class="text-center">
+            <div class="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-2" style="background:#d1fae5;color:#10b981"><i class="fa-solid fa-store text-xl"></i></div>
+            <p class="text-[10px] text-slate-400 uppercase font-bold">Магазин</p>
+            <p class="font-black text-lg">BF-Pay Терминал</p>
+          </div>
+          <div class="receipt-dashed"></div>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between"><span class="text-slate-400">Категория</span><span id="bfpay-cat-preview" class="font-bold">—</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Способ оплаты</span><span id="bfpay-card-preview" class="font-bold">—</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Кэшбэк</span><span id="bfpay-cashback-preview" class="font-bold text-emerald-600">+0 баллов</span></div>
+          </div>
+          <div class="receipt-dashed"></div>
+          <div class="flex justify-between items-center"><span class="text-slate-400 text-sm font-bold">Итого</span><span id="bfpay-amount-preview" class="font-black text-2xl">0 ₽</span></div>
+        </div>
+        <div class="nfc-pulse mb-6"><i class="fa-solid fa-wifi"></i></div>
+        <p class="text-center text-slate-400 font-bold uppercase text-[11px] mb-1 tracking-wider">Приложите карту</p>
+        <p class="text-center text-xs text-slate-400 mb-8">или подтвердите вручную</p>
+        <div class="flex gap-3">
+          <button type="button" onclick="bfpayBack()" class="flex-1 bg-slate-100 py-4 rounded-2xl font-bold text-slate-500 animate-press">Назад</button>
+          <button type="button" onclick="confirmBFPay()" class="flex-1 pay-button" style="padding:16px;font-size:15px;width:auto">Подтвердить</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="transfer-success" class="hidden transfer-success-overlay">
+      <div class="transfer-success-card">
+        <svg class="success-check-svg" viewBox="0 0 100 100">
+          <defs><linearGradient id="checkGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient></defs>
+          <path d="M25 52 L45 72 L75 35" fill="none" stroke="url(#checkGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="success-title">Перевод доставлен</h2>
+        <div class="success-amount" id="ts-amount">0 ₽</div>
+        <p class="success-info">Комиссия <b id="ts-commission">0 ₽</b><br><span id="ts-recipient">—</span></p>
+        <div class="success-buttons">
+          <button class="success-btn success-btn-check" onclick="showTransferReceipt()"><i class="fa-solid fa-receipt"></i> Чек</button>
+          <button class="success-btn success-btn-history" onclick="goToHistoryFromSuccess()">В историю</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-foreign" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+        <i onclick="closeModal('modal-foreign')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold text-lg">За границу</span><div class="w-8"></div>
+      </div>
+      <div class="p-8 space-y-6 pb-32">
+        <div class="space-y-3">
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Страна</label>
+          <div class="grid grid-cols-2 gap-2" id="foreign-countries-container"></div>
+        </div>
+        <div><label class="text-[10px] font-bold text-slate-400 uppercase">Счёт</label><select id="foreign-card" class="w-full bg-slate-50 p-5 rounded-2xl mt-1 font-bold"></select></div>
+        <div><label class="text-[10px] font-bold text-slate-400 uppercase">Сумма (₽)</label><input id="foreign-am" type="number" placeholder="0" class="w-full bg-slate-50 p-5 rounded-2xl mt-1 font-bold text-2xl"></div>
+        <button onclick="confirmForeignTransfer()" class="w-full bg-indigo-600 text-white py-5 rounded-3xl font-bold shadow-xl animate-press">Отправить</button>
+      </div>
+    </div>
+
+    <div id="modal-mobile" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+        <i onclick="closeModal('modal-mobile')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold">Мобильная связь</span><div class="w-8"></div>
+      </div>
+      <div class="p-8 space-y-8 pb-32">
+        <div class="bg-red-50 p-6 rounded-3xl flex items-center gap-5 border border-red-100">
+          <div class="w-14 h-14 bg-red-600 text-white rounded-2xl flex items-center justify-center text-sm font-black">МТС</div>
+          <div><p class="font-bold">МТС</p><p class="text-xs text-red-600">+3% баллов</p></div>
+        </div>
+        <div class="space-y-4">
+          <input id="mob-phone" type="tel" placeholder="+7 (999) 000-00-00" class="w-full p-5 bg-slate-50 rounded-2xl font-bold">
+          <input id="mob-am" type="number" placeholder="Сумма" class="w-full p-5 bg-slate-50 rounded-2xl font-bold text-xl">
+        </div>
+        <button onclick="confirmMobilePay()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold text-lg animate-press">Пополнить</button>
+      </div>
+    </div>
+
+    <div id="modal-jkh" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+        <i onclick="closeModal('modal-jkh')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold">Оплата ЖКХ</span><div class="w-8"></div>
+      </div>
+      <div class="p-8 space-y-6 pb-32">
+        <div class="space-y-3">
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Поставщик</label>
+          <div class="grid grid-cols-1 gap-3">
+            <button onclick="selectJKH('ГИС ЖКХ', event)" class="jkh-btn p-5 border-2 rounded-2xl text-left font-bold border-slate-100 animate-press">ГИС ЖКХ</button>
+            <button onclick="selectJKH('ЕПД', event)" class="jkh-btn p-5 border-2 rounded-2xl text-left font-bold border-slate-100 animate-press">ЕПД</button>
+          </div>
+        </div>
+        <input id="jkh-acc" type="number" placeholder="Лицевой счёт" class="w-full bg-slate-50 p-5 rounded-2xl font-bold">
+        <input id="jkh-am" type="number" placeholder="Сумма" class="w-full bg-slate-50 p-5 rounded-2xl font-bold text-xl">
+        <button onclick="confirmJKH()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold animate-press">Оплатить</button>
+      </div>
+    </div>
+
+    <div id="modal-transfer" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+        <i onclick="closeModal('modal-transfer')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold">Перевод</span><div class="w-8"></div>
+      </div>
+      <div class="p-10 flex flex-col items-center pb-32">
+        <div id="tr-avatar" class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl font-black mb-4">?</div>
+        <h3 id="tr-name" class="font-bold text-2xl">Имя</h3>
+        <p class="text-xs text-emerald-600 mt-1 font-semibold">+5% баллов от суммы</p>
+        <div class="w-full mt-10 space-y-6">
+          <select id="tr-card" class="w-full p-4 bg-slate-50 rounded-2xl font-bold"></select>
+          <input id="tr-am" type="number" placeholder="0" class="w-full bg-slate-100 p-6 rounded-3xl text-center text-3xl font-black">
+          <div class="bg-slate-50 p-4 rounded-2xl text-xs space-y-2">
+            <div class="flex justify-between"><span class="text-slate-400">Комиссия</span><span id="tr-commission" class="font-bold">0 ₽</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Итого спишется</span><span id="tr-total" class="font-bold">0 ₽</span></div>
+          </div>
+          <button onclick="confirmTransfer()" class="w-full bg-emerald-500 text-white py-5 rounded-3xl font-bold text-lg animate-press">Перевести</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-notif" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+        <i onclick="closeModal('modal-notif')" class="fa-solid fa-chevron-down text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold">Уведомления</span>
+        <span onclick="clearNotifications()" class="text-xs text-blue-500 font-bold cursor-pointer">Очистить</span>
+      </div>
+      <div id="notif-list" class="p-4 space-y-3 pb-32"></div>
+    </div>
+
+    <div id="modal-add-contact" class="hidden modal-overlay">
+      <div class="modal-card">
+        <h3 class="text-xl font-bold mb-6">Новый контакт</h3>
+        <div class="space-y-4">
+          <input id="con-name" type="text" placeholder="Имя" class="w-full bg-slate-50 p-5 rounded-2xl font-bold">
+          <input id="con-phone" type="tel" placeholder="+7 (___) ___-__-__" class="w-full bg-slate-50 p-5 rounded-2xl font-bold">
+        </div>
+        <div class="flex gap-4 mt-8">
+          <button onclick="closeModal('modal-add-contact')" class="flex-1 font-bold text-slate-400 animate-press">Отмена</button>
+          <button onclick="saveContact()" class="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-bold animate-press">Создать</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-add-card" class="hidden modal-overlay">
+      <div class="modal-card text-center">
+        <h3 class="text-xl font-bold mb-4">Новая карта</h3>
+        <input type="text" id="new-card-holder" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mb-4 text-center" placeholder="Имя владельца">
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <button onclick="createCardWithHolder('PayPal')" class="p-4 border-2 rounded-2xl text-3xl animate-press"><i class="fa-brands fa-cc-paypal"></i></button>
+          <button onclick="createCardWithHolder('Visa')" class="p-4 border-2 rounded-2xl text-3xl animate-press"><i class="fa-brands fa-cc-visa"></i></button>
+          <button onclick="createCardWithHolder('MasterCard')" class="p-4 border-2 rounded-2xl text-3xl animate-press"><i class="fa-brands fa-cc-mastercard"></i></button>
+        </div>
+        <button onclick="closeModal('modal-add-card')" class="w-full py-4 font-bold text-slate-400 animate-press">Закрыть</button>
+      </div>
+    </div>
+
+    <div id="modal-receipt" class="hidden modal-overlay">
+      <div class="modal-card relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-2 bg-emerald-500" id="receipt-line"></div>
+        <div class="text-center mt-2">
+          <div id="receipt-icon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-2xl mb-4 bg-emerald-100 text-emerald-600"><i class="fa-solid fa-receipt"></i></div>
+          <h3 id="receipt-title" class="font-bold text-xl">Операция</h3>
+          <p id="receipt-time" class="text-xs text-slate-400 mb-6">--:--</p>
+          <div class="w-full border-t my-4"></div>
+          <div class="space-y-3 text-left">
+            <div class="flex justify-between"><span class="text-slate-400">Сумма</span><span id="receipt-amount" class="font-black">0 ₽</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Статус</span><span class="text-emerald-500">Подтверждено</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Категория</span><span id="receipt-category">Перевод</span></div>
+          </div>
+          <button onclick="closeModal('modal-receipt')" class="w-full bg-slate-100 py-4 rounded-3xl mt-6 font-bold animate-press">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-card-transfer" class="hidden modal-overlay">
+      <div class="modal-card">
+        <h3 class="text-xl font-bold mb-4">Перевод между картами</h3>
+        <div class="space-y-4">
+          <select id="transfer-from-card" class="w-full p-4 bg-slate-50 rounded-2xl font-bold"></select>
+          <select id="transfer-to-card" class="w-full p-4 bg-slate-50 rounded-2xl font-bold"></select>
+          <input type="number" id="transfer-amount" placeholder="Сумма" class="w-full p-4 bg-slate-50 rounded-2xl text-xl font-bold text-center">
+          <button onclick="confirmCardTransfer()" class="w-full bg-blue-600 text-white py-4 rounded-3xl font-bold animate-press">Перевести</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-design" class="hidden modal-overlay">
+      <div class="modal-card">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-lg font-bold">Изменить дизайн</h3>
+          <i onclick="closeModal('modal-design')" class="fa-solid fa-xmark text-slate-400 p-1 text-lg cursor-pointer"></i>
+        </div>
+        <div class="flex flex-wrap gap-3 justify-center my-5" id="design-grid"></div>
+        <button onclick="uploadCardImage()" class="upload-image-btn"><i class="fa-solid fa-image"></i> Загрузить свою картинку</button>
+        <button onclick="removeCardImage()" id="remove-image-btn" class="upload-image-btn hidden" style="border-style: solid; border-color: #fee2e2; color: #ef4444;"><i class="fa-solid fa-trash-can"></i> Убрать картинку</button>
+        <button onclick="saveCardDesign()" class="w-full bg-blue-600 text-white py-4 rounded-3xl font-bold animate-press mt-4">Сохранить</button>
+      </div>
+    </div>
+
+    <div id="modal-settings" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+        <i onclick="closeModal('modal-settings')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold text-lg">Настройки</span><div class="w-8"></div>
+      </div>
+      <div class="p-6 space-y-6 pb-32">
+        <div class="flex flex-col items-center">
+          <div class="relative w-24 h-24 mb-3">
+            <div class="w-full h-full bg-slate-100 rounded-full flex items-center justify-center overflow-hidden border-4 border-slate-50">
+              <img id="user-avatar-preview" src="" class="w-full h-full object-cover hidden">
+              <i id="user-icon-placeholder-2" class="fa-solid fa-user text-3xl text-slate-300"></i>
+            </div>
+            <label class="absolute bottom-0 right-0 bg-emerald-500 text-white p-2 rounded-full cursor-pointer shadow-lg animate-press">
+              <i class="fa-solid fa-camera text-[10px]"></i>
+              <input type="file" class="hidden" accept="image/*" onchange="handleAvatar(this)">
+            </label>
+          </div>
+          <button onclick="openAvatarPicker()" class="upload-image-btn" style="margin-top:10px;"><i class="fa-solid fa-user-astronaut"></i> Выбрать из набора</button>
+          <input id="set-name" type="text" class="text-center font-bold text-xl outline-none bg-slate-50 px-4 py-2 rounded-2xl w-full mb-4 mt-3">
+        </div>
+        <div class="bg-slate-50 p-4 rounded-3xl flex justify-between items-center">
+          <div class="flex gap-3"><i class="fa-solid fa-crown text-indigo-600"></i><span class="font-semibold">BankFake+ 299₽/мес</span></div>
+          <label class="toggle"><input type="checkbox" id="set-subscription" onchange="toggleSubscription()"><span class="toggle-slider"></span></label>
+        </div>
+        <div>
+          <label class="text-[10px] font-bold uppercase text-slate-400">Зарплата / Интервал (мин. 60 сек)</label>
+          <div class="flex gap-2 mt-2">
+            <input id="set-salary-amount" type="number" placeholder="Сумма" class="flex-1 bg-slate-50 p-4 rounded-2xl font-bold">
+            <input id="set-salary-time" type="number" placeholder="Сек" class="w-24 bg-slate-50 p-4 rounded-2xl font-bold text-center">
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1">Макс: <span id="salary-limit-hint">5 000</span> ₽</p>
+        </div>
+        <div><label class="text-[10px] font-bold uppercase text-slate-400">Карта для списаний</label><select id="set-payment-card" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mt-2"></select></div>
+        <div><label class="text-[10px] font-bold uppercase text-slate-400">Карта для зарплаты</label><select id="set-salary-card" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mt-2"></select></div>
+        <button onclick="saveSettings()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold text-lg animate-press">Сохранить</button>
+      </div>
+    </div>
+
+    <div id="modal-input" class="hidden modal-overlay">
+      <div class="modal-card">
+        <h3 id="input-title" class="text-xl font-bold mb-4">Введите значение</h3>
+        <input id="input-value" type="text" class="w-full bg-slate-50 p-5 rounded-2xl font-bold text-center text-lg mb-6 outline-none">
+        <div class="flex gap-3">
+          <button onclick="closeModal('modal-input')" class="flex-1 bg-slate-100 py-4 rounded-2xl font-bold text-slate-500 animate-press">Отмена</button>
+          <button onclick="submitInputModal()" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold animate-press">ОК</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-piggy" class="hidden modal-overlay">
+        <div class="modal-card">
+            <div class="flex justify-between items-center mb-5">
+                <h3 id="piggy-modal-title" class="text-lg font-bold">Копилка</h3>
+                <i onclick="closeModal('modal-piggy')" class="fa-solid fa-xmark text-slate-400 p-1 text-lg cursor-pointer"></i>
+            </div>
+            <div id="piggy-modal-info" class="mb-6"></div>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <button onclick="piggyTopup()" class="py-4 rounded-2xl font-bold bg-emerald-500 text-white animate-press"><i class="fa-solid fa-plus mr-1"></i>Пополнить</button>
+                <button onclick="piggyWithdraw()" class="py-4 rounded-2xl font-bold bg-blue-500 text-white animate-press"><i class="fa-solid fa-arrow-down mr-1"></i>Снять</button>
+            </div>
+            <button onclick="piggyDelete()" class="w-full py-3 rounded-2xl font-bold bg-red-50 text-red-500 text-sm animate-press"><i class="fa-solid fa-trash-can mr-1"></i>Удалить копилку</button>
+        </div>
+    </div>
+
+    <div id="modal-requisites" class="hidden modal-full">
+        <div class="sticky top-0 p-6 flex items-center justify-between border-b z-10" style="background:rgba(255,255,255,0.92); backdrop-filter:blur(12px);">
+            <i onclick="closeModal('modal-requisites')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+            <span class="font-bold text-lg">Мои реквизиты</span>
+            <i onclick="shareRequisites()" class="fa-solid fa-arrow-up-from-bracket text-xl p-2 cursor-pointer text-emerald-600"></i>
+        </div>
+        <div class="p-6 pb-32">
+            <div class="requisites-card mb-5">
+                <div style="position:relative;z-index:1;">
+                    <p class="text-[10px] uppercase font-bold opacity-60 mb-1">Получатель</p>
+                    <p class="text-xl font-black mb-4" id="req-holder">—</p>
+                    <div class="requisites-row">
+                        <span class="requisites-label">Номер карты</span>
+                        <span class="requisites-value" onclick="copyReq('req-card')">
+                            <span id="req-card">—</span>
+                            <i class="fa-solid fa-copy requisites-copy-hint"></i>
+                        </span>
+                    </div>
+                    <div class="requisites-row">
+                        <span class="requisites-label">БИК</span>
+                        <span class="requisites-value" onclick="copyReq('req-bik')">
+                            <span id="req-bik">044525225</span>
+                            <i class="fa-solid fa-copy requisites-copy-hint"></i>
+                        </span>
+                    </div>
+                    <div class="requisites-row">
+                        <span class="requisites-label">Счёт</span>
+                        <span class="requisites-value" onclick="copyReq('req-account')">
+                            <span id="req-account">40817810099910004312</span>
+                            <i class="fa-solid fa-copy requisites-copy-hint"></i>
+                        </span>
+                    </div>
+                    <div class="requisites-row">
+                        <span class="requisites-label">Банк</span>
+                        <span class="requisites-value">BankFake JSC</span>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 text-center mb-4">Нажмите на значение, чтобы скопировать</p>
+            <button onclick="shareRequisites()" class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold animate-press">
+                <i class="fa-solid fa-share-nodes mr-2"></i>Поделиться реквизитами
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-avatar-picker" class="hidden modal-overlay">
+        <div class="modal-card">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Выбрать аватар</h3>
+                <i onclick="closeModal('modal-avatar-picker')" class="fa-solid fa-xmark text-slate-400 p-1 text-lg cursor-pointer"></i>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">Или загрузите своё фото в настройках</p>
+            <div class="avatar-picker-grid" id="avatar-picker-grid"></div>
+        </div>
+    </div>
+
+    <div id="modal-mortgage" class="hidden modal-full">
+        <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+            <i onclick="closeModal('modal-mortgage')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+            <span class="font-bold text-lg">Ипотека</span><div class="w-8"></div>
+        </div>
+        <div class="p-6 space-y-5 pb-32">
+            <div class="mortgage-card">
+                <p class="text-[11px] uppercase font-bold opacity-80 relative z-10">До 10 000 000 ₽</p>
+                <p class="text-3xl font-black mt-2 relative z-10">Ипотека</p>
+                <p class="text-xs opacity-80 mt-1 relative z-10">Ставка от 6% · Срок до 30 лет</p>
+                <i class="fa-solid fa-house absolute bottom-4 right-5 text-5xl opacity-20"></i>
+            </div>
+            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Сумма ипотеки</label><input id="mortgage-am" type="number" placeholder="5 000 000" class="w-full bg-slate-50 p-5 rounded-2xl mt-1 font-bold text-2xl"></div>
+            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Срок (лет)</label><select id="mortgage-term" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mt-1"></select></div>
+            <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-slate-400">Ежемесячный платёж</span><span id="mortgage-monthly" class="font-bold">0 ₽</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Переплата</span><span id="mortgage-overpay" class="font-bold text-red-500">0 ₽</span></div>
+            </div>
+            <button onclick="confirmMortgage()" class="w-full bg-emerald-600 text-white py-5 rounded-3xl font-bold text-lg animate-press">Оформить ипотеку</button>
+        </div>
+    </div>
+
+    <div id="modal-confirm" class="hidden confirm-overlay">
+      <div class="confirm-card">
+        <div class="confirm-icon" id="confirm-icon"><i class="fa-solid fa-trash-can"></i></div>
+        <h3 class="confirm-title" id="confirm-title">Подтвердите</h3>
+        <p class="confirm-text" id="confirm-text">Описание</p>
+        <div class="confirm-buttons">
+          <button class="btn-cancel" onclick="closeModal('modal-confirm')">Отмена</button>
+          <button class="btn-danger" id="confirm-action-btn">Подтвердить</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-credit" class="hidden modal-full">
+      <div class="sticky top-0 p-6 flex items-center justify-between border-b" style="background:rgba(255,255,255,0.92);">
+        <i onclick="closeModal('modal-credit')" class="fa-solid fa-chevron-left text-xl p-2 cursor-pointer"></i>
+        <span class="font-bold text-lg">Кредит</span><div class="w-8"></div>
+      </div>
+      <div class="p-6 space-y-5 pb-32">
+        <div class="p-6 rounded-3xl text-white text-center" style="background:linear-gradient(135deg,#2563eb,#1e40af);">
+          <p class="text-[11px] uppercase font-bold opacity-80 tracking-wide">Максимальная сумма</p>
+          <p class="text-3xl font-black mt-2">1 000 000 ₽</p>
+          <p class="text-xs opacity-80 mt-1">Ставка от 4.9% · Срок до 5 лет</p>
+        </div>
+        <div><label class="text-[10px] font-bold text-slate-400 uppercase">Сумма кредита</label><input id="credit-am" type="number" placeholder="100 000" class="w-full bg-slate-50 p-5 rounded-2xl mt-1 font-bold text-2xl"></div>
+        <div><label class="text-[10px] font-bold text-slate-400 uppercase">Срок (месяцев)</label><select id="credit-term" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mt-1"></select></div>
+        <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-slate-400">Ежемесячный платёж</span><span id="credit-monthly" class="font-bold">0 ₽</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Переплата</span><span id="credit-overpay" class="font-bold text-red-500">0 ₽</span></div>
+        </div>
+        <button onclick="confirmCredit()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-bold text-lg animate-press">Оформить кредит</button>
+      </div>
+    </div>
+</div>
+
+<script src="inf.js?v=3"></script>
+<script src="bank.js?v=3"></script>
+<script src="assistant.js?v=3"></script>
+</body>
+</html>

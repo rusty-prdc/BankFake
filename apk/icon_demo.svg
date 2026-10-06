@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1f3a"/>
+      <stop offset="1" stop-color="#123f6b"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2ee6a8"/>
+      <stop offset="1" stop-color="#19b3d8"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="404" cy="108" r="150" fill="#2ee6a8" opacity="0.10"/>
+  <circle cx="96" cy="432" r="170" fill="#19b3d8" opacity="0.10"/>
+  <!-- карта -->
+  <g transform="rotate(-8 256 262)">
+    <rect x="86" y="170" width="340" height="214" rx="30" fill="url(#card)"/>
+    <rect x="86" y="170" width="340" height="214" rx="30" fill="url(#shine)"/>
+    <rect x="86" y="216" width="340" height="44" fill="#0b1f3a" opacity="0.85"/>
+    <rect x="118" y="292" width="84" height="58" rx="12" fill="#f4d27a"/>
+    <rect x="128" y="302" width="64" height="38" rx="6" fill="#e9be55"/>
+    <!-- бесконтактные волны -->
+    <g stroke="#0b1f3a" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.9">
+      <path d="M330 300 a44 44 0 0 1 0 64"/>
+      <path d="M356 282 a76 76 0 0 1 0 100"/>
+      <path d="M382 264 a108 108 0 0 1 0 136"/>
+    </g>
+  </g>
+  <!-- знак рубля -->
+  <g stroke="#ffffff" stroke-width="26" stroke-linecap="round" fill="none">
+    <path d="M196 118 v96"/>
+    <path d="M196 150 h64"/>
+    <path d="M196 190 h56"/>
+    <path d="M196 214 a44 44 0 0 0 66 12"/>
+  </g>
+</svg>

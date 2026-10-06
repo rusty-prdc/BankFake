@@ -1,0 +1,416 @@
+/* =========================================================
+   BF Assistant — встроенная вкладка BankFake.
+   Цвета, радиусы и шрифты взяты из bank.css (фирменный стиль).
+   ========================================================= */
+
+#tab-assistant.active {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* запас под фиксированную нижнюю навигацию (85px + safe-area) */
+    min-height: calc(100vh - 85px - env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+}
+
+.bf-as {
+    display: flex;
+    flex-direction: column;
+    /* растягиваемся на всю высоту вкладки, чтобы строка ввода была внизу */
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    background: #f5f7fb;
+}
+
+/* ---------- шапка ---------- */
+.bf-as-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 10px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #f1f5f9;
+    flex-shrink: 0;
+}
+
+.bf-as-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    box-shadow: 0 6px 16px -6px rgba(16, 185, 129, 0.7);
+    flex-shrink: 0;
+}
+
+.bf-as-titles { flex: 1; min-width: 0; }
+
+.bf-as-titles h1 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bf-as-titles h1 i { color: #10b981; font-size: 16px; }
+
+.bf-as-titles p {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.bf-as-new {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.12s, background 0.2s;
+    flex-shrink: 0;
+}
+
+.bf-as-new:active { transform: scale(0.94); }
+
+/* кнопка «Очистить чат»: текст появляется с 360px (на 320px остаётся иконка) */
+.bf-as-new.bf-as-new-text {
+    width: auto;
+    height: 38px;
+    padding: 0 13px;
+    gap: 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.bf-as-new.bf-as-new-text span { display: none; }
+
+@media (min-width: 360px) {
+    .bf-as-new.bf-as-new-text span { display: inline; }
+}
+
+/* ---------- быстрые кнопки ---------- */
+.bf-as-quick {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    background: #f5f7fb;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+}
+
+.bf-as-quick::-webkit-scrollbar { display: none; }
+
+.bf-as-chip {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    padding: 9px 15px;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.12s, background 0.2s, border-color 0.2s;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.bf-as-chip:active { transform: scale(0.95); background: #f0fdf4; border-color: #10b981; }
+
+/* ---------- лента сообщений ---------- */
+.bf-as-messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 6px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f5f7fb;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+.bf-as-messages::-webkit-scrollbar { width: 4px; }
+.bf-as-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+.bf-as-row { display: flex; animation: bfMsgIn 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+.bf-as-row.user { justify-content: flex-end; }
+.bf-as-row.bot { justify-content: flex-start; }
+
+@keyframes bfMsgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bf-as-msg {
+    max-width: 82%;
+    padding: 11px 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    border-radius: 20px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.bf-as-row.user .bf-as-msg {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border-bottom-right-radius: 7px;
+    box-shadow: 0 4px 14px -6px rgba(16, 185, 129, 0.65);
+}
+
+.bf-as-row.bot .bf-as-msg {
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #f1f5f9;
+    border-bottom-left-radius: 7px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.bf-as-msg b, .bf-as-msg strong { font-weight: 800; color: #0f172a; }
+.bf-as-row.user .bf-as-msg b, .bf-as-row.user .bf-as-msg strong { color: #fff; }
+
+.bf-as-msg code {
+    font-family: monospace;
+    background: rgba(15, 23, 42, 0.06);
+    padding: 1px 5px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.bf-as-row.user .bf-as-msg code { background: rgba(255, 255, 255, 0.22); }
+
+/* сообщение-ошибка */
+.bf-as-row.error .bf-as-msg {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    font-size: 13px;
+    max-width: 92%;
+}
+
+/* приветствие */
+.bf-as-row.system .bf-as-msg {
+    background: transparent;
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
+    font-size: 12.5px;
+    text-align: center;
+    max-width: 94%;
+    box-shadow: none;
+}
+
+/* ---------- «печатает...» ---------- */
+.bf-as-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.bf-as-dots { display: inline-flex; gap: 4px; }
+
+.bf-as-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: bfDot 1.2s infinite ease-in-out;
+}
+
+.bf-as-dots span:nth-child(2) { animation-delay: 0.16s; }
+.bf-as-dots span:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes bfDot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+    30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ---------- поле ввода ---------- */
+.bf-as-inputbar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid #e2e8f0;
+}
+
+.bf-as-input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 13px 16px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.bf-as-input::placeholder { color: #94a3b8; }
+.bf-as-input:focus { border-color: #10b981; background: #fff; }
+
+.bf-as-send {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 8px 18px -8px rgba(16, 185, 129, 0.85);
+    transition: transform 0.12s, opacity 0.2s;
+    font-family: inherit;
+}
+
+.bf-as-send:active { transform: scale(0.93); }
+.bf-as-send:disabled { opacity: 0.45; box-shadow: none; cursor: default; }
+
+/* =========================================================
+   Тёмная тема BankFake
+   ========================================================= */
+body.dark .bf-as { background: #0f172a; }
+
+body.dark .bf-as-header {
+    background: rgba(15, 23, 42, 0.94);
+    border-bottom-color: #1e293b;
+}
+
+body.dark .bf-as-titles h1 { color: #f1f5f9; }
+body.dark .bf-as-titles p { color: #64748b; }
+body.dark .bf-as-new { background: #1e293b; color: #94a3b8; }
+
+body.dark .bf-as-quick { background: #0f172a; }
+
+body.dark .bf-as-chip {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+    box-shadow: none;
+}
+
+body.dark .bf-as-chip:active { background: #064e3b; border-color: #10b981; color: #6ee7b7; }
+
+body.dark .bf-as-messages { background: #0f172a; }
+body.dark .bf-as-messages::-webkit-scrollbar-thumb { background: #334155; }
+
+body.dark .bf-as-row.bot .bf-as-msg {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+    box-shadow: none;
+}
+
+body.dark .bf-as-msg b, body.dark .bf-as-msg strong { color: #f8fafc; }
+
+body.dark .bf-as-msg code { background: rgba(255, 255, 255, 0.08); color: #a7f3d0; }
+
+body.dark .bf-as-row.error .bf-as-msg { background: #451a1a; border-color: #7f1d1d; color: #fca5a5; }
+
+body.dark .bf-as-row.system .bf-as-msg { border-color: #334155; color: #94a3b8; }
+
+body.dark .bf-as-typing { color: #94a3b8; }
+
+body.dark .bf-as-inputbar {
+    background: rgba(15, 23, 42, 0.96);
+    border-top-color: #1e293b;
+}
+
+body.dark .bf-as-input {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+body.dark .bf-as-input::placeholder { color: #64748b; }
+body.dark .bf-as-input:focus { border-color: #10b981; background: #1e293b; }
+
+/* =========================================================
+   Адаптив: 320 / 375 / 390 / 412 / 430 / 768+
+   ========================================================= */
+@media (max-width: 360px) {
+    .bf-as-msg { max-width: 88%; font-size: 13.5px; padding: 10px 12px; }
+    .bf-as-titles h1 { font-size: 16px; }
+    .bf-as-chip { padding: 8px 13px; font-size: 12px; }
+    .bf-as-input { padding: 12px 14px; font-size: 13.5px; }
+    .bf-as-header { padding: 14px 12px 9px; gap: 10px; }
+    .bf-as-quick { padding: 10px 12px; }
+    .bf-as-inputbar { padding-left: 10px; padding-right: 10px; }
+    .bf-as-messages { padding-left: 10px; padding-right: 10px; }
+}
+
+@media (min-width: 768px) {
+    .bf-as { max-width: 860px; width: 100%; margin: 0 auto; }
+    .bf-as-msg { max-width: 70%; font-size: 15px; }
+    .bf-as-titles h1 { font-size: 20px; }
+}
+
+/* =========================================================
+   Нижняя навигация: 6 пунктов, среди них «Ассистент».
+   На 320px подписи уменьшаются, чтобы ничего не обрезалось.
+   ========================================================= */
+.bottom-nav {
+    justify-content: space-between;
+    gap: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.bottom-nav .nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 1px;
+}
+
+.bottom-nav .nav-item span {
+    font-size: 9.5px;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+@media (max-width: 344px) {
+    .bottom-nav .nav-item span { font-size: 8.5px; }
+    .bottom-nav .nav-item i { font-size: 17px; }
+}
+
+@media (min-width: 400px) {
+    .bottom-nav .nav-item span { font-size: 10px; }
+}

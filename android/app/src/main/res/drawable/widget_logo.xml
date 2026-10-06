@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="45dp"
+    android:viewportWidth="160"
+    android:viewportHeight="200">
+    <!-- знак B: зелёный силуэт -->
+    <path
+        android:fillColor="#00A64E"
+        android:pathData="M0,0 H95 C140,0 155,22 155,50 C155,76 140,100 112,100 C146,100 160,124 160,150 C160,180 140,200 100,200 H0 Z" />
+    <!-- верхний просвет (кремовый) -->
+    <path
+        android:fillColor="#F7F7F1"
+        android:pathData="M84,30 H98 A22,22 0 0 1 98,74 H84 A22,22 0 0 1 84,30 Z" />
+    <!-- нижний просвет (кремовый) -->
+    <path
+        android:fillColor="#F7F7F1"
+        android:pathData="M84,132 H108 A22,22 0 0 1 108,176 H84 A22,22 0 0 1 84,132 Z" />
+</vector>

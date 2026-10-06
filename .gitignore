@@ -1,0 +1,18 @@
+# ===== СЕКРЕТЫ — никогда не коммитить =====
+.env
+*.keystore
+
+# ===== Сборка Android =====
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+*.apk.idsig
+
+# ===== Системное / редакторы =====
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+Thumbs.db

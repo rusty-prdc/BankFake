@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'org.xprodc.ivan'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "org.xprodc.ivan"
+        minSdk 26
+        targetSdk 34
+        versionCode 200002
+        versionName "1.2"
+    }
+
+    signingConfigs {
+        release {
+            storeFile rootProject.file('bankfake.keystore')
+            storePassword 'bankfake2026'
+            keyAlias 'bankfake'
+            keyPassword 'bankfake2026'
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Веб-часть копируется в assets прямо из корня проекта (bankfake/)
+// ВАЖНО: vendor должен лежать в assets/vendor/ (иначе tailwind/шрифты не найдутся)
+def webRoot = file("$rootDir/..")
+tasks.register('copyWebAssets', Sync) {
+    from(webRoot) {
+        include 'bank.html', 'bank.css', 'bank.js', 'inf.js', 'assistant.js', 'assistant.css'
+        include 'vendor/**'
+    }
+    into layout.projectDirectory.dir('src/main/assets')
+}
+tasks.named('preBuild').configure { dependsOn 'copyWebAssets' }

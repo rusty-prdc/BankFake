@@ -1,0 +1,14 @@
+.env
+*.key
+secrets/
+.agent_token
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+data/
+*.db
+*.db-wal
+*.db-shm
+logs/

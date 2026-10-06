@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Карта BankFake: белая карта, зелёная полоса, золотой чип -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- тень карты -->
+    <path
+        android:fillColor="#334155"
+        android:pathData="M32,42 H82 A9,9 0 0 1 91,51 V69 A9,9 0 0 1 82,78 H32 A9,9 0 0 1 23,69 V51 A9,9 0 0 1 32,42 Z" />
+
+    <!-- карта -->
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M30,38 H80 A9,9 0 0 1 89,47 V65 A9,9 0 0 1 80,74 H30 A9,9 0 0 1 21,65 V47 A9,9 0 0 1 30,38 Z" />
+
+    <!-- полоса -->
+    <path
+        android:fillColor="#10b981"
+        android:pathData="M21,45 H89 V54 H21 Z" />
+
+    <!-- чип -->
+    <path
+        android:fillColor="#f59e0b"
+        android:pathData="M33,63 m-6,0 a6,6 0 1 0 12,0 a6,6 0 1 0 -12,0" />
+
+    <!-- номера карты -->
+    <path
+        android:fillColor="#cbd5e1"
+        android:pathData="M46,60 h10 v3 h-10 Z M60,60 h10 v3 h-10 Z M74,60 h8 v3 h-8 Z" />
+</vector>

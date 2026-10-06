@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="16dp"
+    android:background="@drawable/widget_bg">
+
+    <ImageView
+        android:id="@+id/w_logo"
+        android:layout_width="36dp"
+        android:layout_height="45dp"
+        android:src="@drawable/widget_logo"
+        android:contentDescription="BankFake" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="14dp">
+
+        <TextView
+            android:id="@+id/w_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BankFake"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#00A64E"
+            android:letterSpacing="0.08" />
+
+        <TextView
+            android:id="@+id/w_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2 500 ₽"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#0B0B0B"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/w_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Курсы и цели — в приложении"
+            android:textSize="11sp"
+            android:textColor="#64748B"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:layout_marginTop="1dp" />
+    </LinearLayout>
+</LinearLayout>
