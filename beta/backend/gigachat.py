@@ -187,9 +187,20 @@ def _chat_once(messages: list[dict], functions: list[dict] | None,
         raise GigaChatError("unavailable", config.MSG_UNAVAILABLE, f"HTTP {resp.status_code}: {text}")
 
     try:
-        return resp.json()
+        data = resp.json()
     except ValueError as exc:
         raise GigaChatError("unavailable", config.MSG_UNAVAILABLE, "не JSON в ответе") from exc
+
+    # дневной кап: прибавляем фактический расход токенов
+    try:
+        total = int(((data or {}).get("usage") or {}).get("total_tokens") or 0)
+        if total > 0:
+            import usage as _usage_store
+            _usage_store.add(total)
+    except Exception:  # noqa: BLE001 — счётчик не должен ломать запрос
+        pass
+
+    return data
 
 
 def chat(messages: list[dict], functions: list[dict] | None = None,

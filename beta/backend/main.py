@@ -27,6 +27,7 @@ from pydantic import BaseModel
 import config
 import gigachat
 import tools
+import usage
 from prompts import EMPTY_INPUT_MESSAGE, SYSTEM_PROMPT
 
 logging.basicConfig(
@@ -130,6 +131,8 @@ def health() -> dict:
         gigachat_configured=gigachat.is_configured(),
         model=config.GIGACHAT_MODEL,
         api_url=config.GIGACHAT_API_URL,
+        daily_tokens=usage.today_usage()["tokens"],
+        daily_token_cap=config.DAILY_TOKEN_CAP,
         time=int(time.time()),
     )
 
@@ -168,6 +171,10 @@ def chat(payload: ChatRequest, request: Request):  # noqa: ANN201
 
     if _rate_limited(request):
         return _err(429, "rate_limit", config.MSG_RATE_LIMIT)
+
+    if usage.exceeded():
+        # дневной кап токенов на весь проект — не идём в GigaChat
+        return _err(429, "daily_token_cap", config.MSG_TOKEN_CAP)
 
     if not gigachat.is_configured():
         log.error("GIGACHAT_AUTH_KEY не задан в .env")
