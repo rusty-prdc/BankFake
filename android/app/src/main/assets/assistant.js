@@ -15,9 +15,9 @@
     var MSG_NO_KEY = 'Ассистент временно недоступен. Проверьте подключение к интернету.';
     var MSG_RATE = 'Слишком много запросов. Подождите минуту и попробуйте снова.';
 
-    /* ---------- дневной лимит ИИ (25 запросов) ---------- */
+    /* ---------- дневной лимит ИИ (15 запросов) ---------- */
     var LIMIT_KEY = 'bf_ai_daily';          // {date:'YYYY-M-D', count:N}
-    var DAILY_LIMIT = 25;
+    var DAILY_LIMIT = 15;
 
     function todayKey() {
         var d = new Date();
@@ -196,7 +196,7 @@
                     theme: c.theme || 'blue', is_gold: !!c.isGold
                 };
             }),
-            history: (Array.isArray(s.history) ? s.history : []).slice(0, 500).map(function (h) {
+            history: (Array.isArray(s.history) ? s.history : []).slice(0, 80).map(function (h) {
                 var item = {
                     type: h.type, title: String(h.title || ''),
                     amount: num(h.amount), time: String(h.time || '')

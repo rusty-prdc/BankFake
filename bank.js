@@ -1880,7 +1880,7 @@ function escHTML(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').r
 function updateAILimitUI() {
     const n = (window.BFA && BFA.remaining) ? BFA.remaining() : null;
     if (n === null) return;
-    const txt = 'ИИ-запросов сегодня: ' + n + ' из ' + ((BFA.dailyLimit) || 25);
+    const txt = 'ИИ-запросов сегодня: ' + n + ' из ' + ((BFA.dailyLimit) || 15);
     ['chart-ai-left', 'term-left'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = txt; });
 }
 function renderWeekBars() {
@@ -1924,7 +1924,7 @@ function renderDictHTML() {
     let html = '<h3 class="text-xs font-bold text-slate-400 uppercase mb-3 px-1">Финансовый словарь</h3><div class="dict-grid">';
     FIN_TERMS.forEach(t => { html += '<button class="dict-chip" onclick="openTerm(\'' + t + '\')">' + t + '</button>'; });
     html += '</div><p class="dict-hint"><i class="fa-solid fa-circle-info mr-1"></i>Объяснения даёт ИИ-ассистент: каждый ответ списывает 1 запрос из дневного лимита (' +
-        ((window.BFA && BFA.dailyLimit) || 25) + ' в день).</p>';
+        ((window.BFA && BFA.dailyLimit) || 15) + ' в день).</p>';
     return html;
 }
 function openTerm(name) {
