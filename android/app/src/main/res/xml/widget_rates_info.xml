@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="250dp"
+    android:minWidth="180dp"
     android:minHeight="90dp"
-    android:targetCellWidth="4"
+    android:targetCellWidth="3"
     android:targetCellHeight="2"
     android:updatePeriodMillis="1800000"
     android:resizeMode="horizontal|vertical"
-    android:minResizeWidth="140dp"
-    android:minResizeHeight="40dp"
     android:widgetCategory="home_screen"
     android:initialLayout="@layout/widget_bankfake"
     android:previewLayout="@layout/widget_bankfake"
-    android:description="@string/widget_description" />
+    android:description="@string/widget_rates_description" />

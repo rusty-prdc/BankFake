@@ -32,7 +32,8 @@ let state = {
     deposits: [], piggyBanks: [], stocks: [], portfolio: {},
     wallet: { USD: 320, EUR: 210, CNY: 900 }, rates: null,
     hasSeenTutorial: false, hasAcceptedConsent: false, prodTab: 'deposits',
-    pushEnabled: true, vibrateEnabled: true, updaterSeen: ''
+    pushEnabled: true, vibrateEnabled: true, updaterSeen: '',
+    hideBalance: false, pin: '', customCats: [], reminder: { text: '', hour: -1, minute: 0 }
 };
 let currentCardIndex = 0, chartVisible = false, pendingDeleteCardId = null,
     selectedDesign = 'blue', inputCallback = null, confirmCallback = null,
@@ -54,6 +55,8 @@ function formatMoney(v) {
     if (!isFinite(n)) return '0 ₽';
     return n.toLocaleString('ru-RU') + ' ₽';
 }
+/* приватность: скрытие баланса */
+function maskMoney(v) { return state.hideBalance ? '••••' : (Number(v) || 0).toLocaleString(); }
 
 /* ===================== СОГЛАШЕНИЕ ===================== */
 function showConsent() {
@@ -639,7 +642,24 @@ function syncWidget() {
         const r = state.rates && state.rates.items;
         if (r && r.USD) parts.push('$ ' + fmtNum(r.USD.value));
         if (r && r.EUR) parts.push('€ ' + fmtNum(r.EUR.value));
-        window.BFJson.widget(formatMoney(state.balance), parts.join(' · '));
+        window.BFJson.widget(state.hideBalance ? '•••• ₽' : formatMoney(state.balance), parts.join(' · '));
+
+        /* виджет «Курсы валют» */
+        if (typeof window.BFJson.widgetRates === 'function' && r) {
+            const rateLine = ['$ ' + fmtNum(r.USD.value), '€ ' + fmtNum(r.EUR.value)]
+                .concat(r.CNY ? ['¥ ' + fmtNum(r.CNY.value)] : []).join(' · ');
+            window.BFJson.widgetRates(rateLine, 'Курсы ЦБ на сегодня');
+        }
+        /* виджет «Цели» */
+        if (typeof window.BFJson.widgetGoals === 'function') {
+            if (piggies.length) {
+                const g = piggies.slice(0, 2).map(p =>
+                    Math.min(100, Math.round((p.current / p.target) * 100)) + '% ' + String(p.name || '').slice(0, 12)).join(' · ');
+                window.BFJson.widgetGoals(g || 'Копилки', piggies.length > 1 ? 'Цели копилок' : 'Прогресс цели');
+            } else {
+                window.BFJson.widgetGoals('Копилок нет', 'Создайте цель в BankFake');
+            }
+        }
     } catch (e) { /* мостика нет — веб-режим */ }
 }
 
@@ -1000,6 +1020,10 @@ function loadFromLocalStorage() {
             if (state.salaryLimit === null) state.salaryLimit = Infinity;
             if (state.topupLimit === undefined) state.topupLimit = D.topupLimit || 10000;
             if (state.salaryLimit === undefined) state.salaryLimit = D.salaryLimit || 5000;
+            if (!Array.isArray(state.customCats)) state.customCats = [];
+            if (!state.reminder) state.reminder = { text: '', hour: -1, minute: 0 };
+            if (state.hideBalance === undefined) state.hideBalance = false;
+            if (state.pin === undefined) state.pin = '';
         } catch(e){ console.error('[loadFromLocalStorage]', e); }
         if (state.avatar) {
             document.querySelectorAll('#user-avatar-main, #user-avatar-profile, #user-avatar-preview').forEach(img => { if (img) { img.src = state.avatar; attachAvatarFallback(img); img.classList.remove('hidden'); } });
@@ -1218,7 +1242,7 @@ function renderCarousel(animate = false) {
     const dcv = document.getElementById('details-cvv'); if (dcv) dcv.innerText = state.cvvVisible ? card.cvv : '•••';
     const dh = document.getElementById('details-holder'); if (dh) dh.innerText = card.holder;
     const de = document.getElementById('details-expiry'); if (de) de.innerText = card.expiry;
-    const db = document.getElementById('details-balance'); if (db) db.innerText = card.isGold ? '∞' : card.balance.toLocaleString();
+    const db = document.getElementById('details-balance'); if (db) db.innerText = card.isGold ? '∞' : maskMoney(card.balance);
     const dtl = document.getElementById('details-topup-limit'); if (dtl) dtl.innerText = formatLimit(state.topupLimit);
     const dots = document.getElementById('card-dots'); if (!dots) return;
     dots.innerHTML = '';
@@ -1471,7 +1495,7 @@ function renderWalletCards() {
         const hasCustom = !!c.customImage;
         const bgStyle = hasCustom ? `background-image:url(${c.customImage});background-size:cover;background-position:center;` : '';
         const bgClass = hasCustom ? '' : `card-theme-${theme}`;
-        const bal = c.isGold ? '∞' : c.balance.toLocaleString();
+        const bal = c.isGold ? '∞' : maskMoney(c.balance);
         const brandIcon = c.isGold ? 'fa-gem' : (c.type === 'PayPal' ? 'fa-cc-paypal' : (c.type === 'MasterCard' ? 'fa-cc-mastercard' : 'fa-cc-visa'));
         const overlay = hasCustom ? '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);border-radius:24px;"></div>' : '';
         container.innerHTML += `<div class="wallet-card-mini ${bgClass}" style="${bgStyle}position:relative;" onclick="openCardFromWallet(${i})">${overlay}<div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;height:100%;"><div class="mini-brand"><span class="text-[10px] font-bold opacity-85 uppercase tracking-wider">${c.blocked ? '🔒 ' : ''}${c.type}</span><i class="fa-brands ${brandIcon} text-xl"></i></div><div><div class="mini-balance">${bal} ₽</div><div class="mini-num">${c.fullNumber}</div></div></div></div>`;
@@ -1489,7 +1513,7 @@ function renderMainHistory() {
 function updateUI() {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
     set('display-name', state.name);
-    set('main-balance', (state.balance || 0).toLocaleString());
+    set('main-balance', maskMoney(state.balance));
     set('points-balance', (state.points || 0).toLocaleString());
     set('profile-points', (state.points || 0).toLocaleString());
     set('shop-points', (state.points || 0).toLocaleString());
@@ -1503,7 +1527,10 @@ function updateUI() {
     const histDiv = document.getElementById('history-list');
     if (histDiv) {
         let filtered = state.history;
-        if (historyFilter !== 'all') {
+        if (historyFilter.startsWith('cat:')) {
+            const c = historyFilter.slice(4);
+            filtered = state.history.filter(h => h.cat === c);
+        } else if (historyFilter !== 'all') {
             filtered = state.history.filter(h => {
                 const cat = categorizeHistoryItem(h);
                 if (historyFilter === 'expense') return h.type === 'expense';
@@ -1524,7 +1551,7 @@ function updateUI() {
         });
     }
     renderWalletCards(); renderMainHistory(); updateProUI();
-    renderMainGoals(); syncWidget();
+    renderMainGoals(); syncWidget(); renderHistoryCats();
     if (document.getElementById('tab-cards')?.classList.contains('active')) renderCarousel();
     if (chartVisible) drawExpensesChart();
     renderShop();
@@ -1762,12 +1789,14 @@ function openNotifications() {
     document.getElementById('modal-notif').classList.remove('hidden');
 }
 function clearNotifications() { state.notifications = []; saveToLocalStorage(); updateUI(); closeModal('modal-notif'); }
+let currentReceiptIdx = -1;
 function openReceipt(idx) {
     const item = state.history[idx]; if (!item) return;
+    currentReceiptIdx = idx;
     document.getElementById('receipt-title').innerText = item.title;
     document.getElementById('receipt-time').innerText = "Чек от " + item.time;
     document.getElementById('receipt-amount').innerText = (item.type === 'income' ? '+ ' : '- ') + item.amount.toLocaleString() + " ₽";
-    document.getElementById('receipt-category').innerText = item.type === 'income' ? 'Пополнение' : 'Расход';
+    document.getElementById('receipt-category').innerText = item.cat || (item.type === 'income' ? 'Пополнение' : 'Расход');
     const icon = document.getElementById('receipt-icon'); const line = document.getElementById('receipt-line');
     if (item.type === 'income') {
         icon.style.background = '#d1fae5'; icon.style.color = '#10b981';
@@ -1867,6 +1896,146 @@ function startSalaryTimer() {
     }, 1000);
 }
 function toggleDarkTheme() { state.darkTheme = !state.darkTheme; document.body.classList.toggle('dark', state.darkTheme); saveToLocalStorage(); }
+
+/* ===================== ПРИВАТНОСТЬ: СКРЫТЬ БАЛАНС ===================== */
+function toggleHideBalance(v) {
+    state.hideBalance = !!v; saveToLocalStorage(); updateUI();
+    showAlert(state.hideBalance ? "Баланс скрыт" : "Баланс показан");
+}
+
+/* ===================== ПРИВАТНОСТЬ: PIN-КОД ===================== */
+let pinBuf = '', pinFails = 0;
+function setupPin() {
+    askInput(state.pin ? 'Новый PIN (4-6 цифр, пусто — отключить)' : 'Задайте PIN (4-6 цифр)', '', (val) => {
+        const v = String(val || '').trim();
+        if (!v) { state.pin = ''; saveToLocalStorage(); updatePinStatus(); showAlert('PIN отключён'); return; }
+        if (!/^\d{4,6}$/.test(v)) return showAlert('PIN: только 4-6 цифр');
+        state.pin = v; saveToLocalStorage(); updatePinStatus(); showAlert('PIN включён');
+    });
+}
+function updatePinStatus() {
+    const el = document.getElementById('pin-status');
+    if (el) el.innerText = state.pin ? 'вкл.' : 'выкл.';
+}
+function showPinLock() {
+    if (!state.pin) return;
+    pinBuf = ''; pinFails = 0; renderPinDisplay();
+    document.getElementById('pin-lock')?.classList.remove('hidden');
+}
+function hidePinLock() { document.getElementById('pin-lock')?.classList.add('hidden'); }
+function renderPinDisplay() {
+    const el = document.getElementById('pin-display');
+    if (el) el.innerText = pinBuf ? '•'.repeat(pinBuf.length) : '';
+}
+function pinKey(d) { if (pinBuf.length < 6) { pinBuf += d; renderPinDisplay(); } }
+function pinBack() { pinBuf = pinBuf.slice(0, -1); renderPinDisplay(); }
+function pinCheck() {
+    if (pinBuf === state.pin) { pinFails = 0; pinBuf = ''; hidePinLock(); return; }
+    pinFails++; pinBuf = ''; renderPinDisplay();
+    const box = document.getElementById('pin-display');
+    if (box) { box.classList.add('pin-error'); setTimeout(() => box.classList.remove('pin-error'), 500); }
+    if (pinFails >= 5) showAlert('Слишком много попыток. Попробуйте позже.');
+}
+function pinForgot() {
+    askConfirm('Сбросить PIN?', 'PIN будет отключён, данные останутся.', () => {
+        state.pin = ''; saveToLocalStorage(); updatePinStatus(); hidePinLock(); showAlert('PIN отключён');
+    }, 'danger');
+}
+
+/* ===================== ИСТОРИЯ: СВОИ КАТЕГОРИИ ===================== */
+function editReceiptCategory() {
+    if (currentReceiptIdx < 0 || !state.history[currentReceiptIdx]) return;
+    const item = state.history[currentReceiptIdx];
+    askInput('Своя категория (пусто — авто)', item.cat || '', (val) => {
+        const v = String(val || '').trim();
+        item.cat = v || null;
+        if (v && !state.customCats.includes(v)) state.customCats.push(v);
+        saveToLocalStorage(); renderHistoryCats(); updateUI();
+        document.getElementById('receipt-category').innerText = item.cat || (item.type === 'income' ? 'Пополнение' : 'Расход');
+        showAlert('Категория сохранена');
+    });
+}
+function renderHistoryCats() {
+    const box = document.getElementById('history-cats'); if (!box) return;
+    const used = [...new Set(state.history.map(h => h.cat).filter(Boolean))];
+    const all = [...new Set([...(state.customCats || []), ...used])];
+    if (!all.length) { box.innerHTML = ''; return; }
+    box.innerHTML = all.map(c => `<button class="history-filter-btn ${historyFilter === 'cat:' + c ? 'active' : ''}" data-filter="cat:${c}">${c}</button>`).join('');
+    box.querySelectorAll('.history-filter-btn').forEach(b => {
+        b.addEventListener('click', () => {
+            historyFilter = historyFilter === b.dataset.filter ? 'all' : b.dataset.filter;
+            document.querySelectorAll('.history-filter-btn').forEach(x => x.classList.toggle('active', x.dataset.filter === historyFilter));
+            updateUI();
+        });
+    });
+}
+
+/* ===================== ИИ-ОТЧЁТ ЗА МЕСЯЦ ===================== */
+function askMonthReport() {
+    if (!window.BFA || typeof BFA.sendText !== 'function') return;
+    const since = Date.now() - 30 * 86400000;
+    const items = state.history.filter(h => (h.ts || 0) >= since);
+    const inc = items.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0);
+    const exp = items.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0);
+    const byCat = {};
+    items.forEach(h => { if (h.type === 'expense') { const c = h.cat || getCategoryFromTitle(h.title) || 'Прочее'; byCat[c] = (byCat[c] || 0) + h.amount; } });
+    const top = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${k}: ${Math.round(v)} ₽`).join(', ') || 'нет';
+    const q = `Составь отчёт за месяц (последние 30 дней). Доходы: ${Math.round(inc)} ₽, расходы: ${Math.round(exp)} ₽, операций: ${items.length}, статьи расходов — ${top}. Баланс сейчас: ${state.balance} ₽. Коротко: итог, 3 вывода, без советов «куда тратить».`;
+    switchTab('assistant');
+    BFA.sendText(q);
+}
+
+/* ===================== ЧИТ-ПАНЕЛЬ: ЛЮБОЙ БАЛАНС ===================== */
+function applyCheatBalance() {
+    const raw = (document.getElementById('set-cheat-balance')?.value || '').replace(/[^\d]/g, '');
+    if (!raw) return showAlert('Введите сумму');
+    const n = Math.min(Number(raw), 999999999999);
+    state.balance = n;
+    const c = state.cards[currentCardIndex];
+    if (c) c.balance = n;
+    saveToLocalStorage(); updateUI();
+    showAlert('Баланс: ' + formatMoney(n));
+}
+
+/* ===================== РЕДАКТИРУЕМЫЙ НОМЕР КАРТЫ ===================== */
+function editCardNumber() {
+    const card = state.cards[currentCardIndex]; if (!card) return;
+    askInput('Номер карты (16 цифр)', (card.fullNumber || '').replace(/\s/g, ''), (val) => {
+        const d = String(val || '').replace(/\D/g, '');
+        if (d.length !== 16) return showAlert('Нужно ровно 16 цифр');
+        card.fullNumber = d.replace(/(\d{4})(?=\d)/g, '$1 ');
+        card.number = d.slice(12);
+        saveToLocalStorage(); renderCarousel(); renderWalletCards();
+        showAlert('Номер изменён');
+    });
+}
+
+/* ===================== НАПОМИНАНИЕ О ПЛАТЕЖЕ ===================== */
+function updateReminderStatus() {
+    const el = document.getElementById('reminder-status');
+    if (el) el.innerText = state.reminder && state.reminder.hour >= 0
+        ? `${String(state.reminder.hour).padStart(2, '0')}:${String(state.reminder.minute).padStart(2, '0')}` : 'выкл.';
+}
+function setupReminder() {
+    askInput('Текст напоминания (пусто — выключить)', (state.reminder && state.reminder.text) || '', (txt) => {
+        const t = String(txt || '').trim();
+        if (!t) {
+            state.reminder = { text: '', hour: -1, minute: 0 };
+            if (window.BFJson && BFJson.reminderOff) BFJson.reminderOff();
+            saveToLocalStorage(); updateReminderStatus(); showAlert('Напоминание выключено'); return;
+        }
+        askInput('Время, ЧЧ:ММ (например 18:30)', state.reminder && state.reminder.hour >= 0
+            ? `${String(state.reminder.hour).padStart(2, '0')}:${String(state.reminder.minute).padStart(2, '0')}` : '18:30', (tm) => {
+            const m = /^(\d{1,2}):(\d{2})$/.exec(String(tm || '').trim());
+            if (!m) return showAlert('Формат: ЧЧ:ММ');
+            const h = Math.min(23, parseInt(m[1], 10)), mi = Math.min(59, parseInt(m[2], 10));
+            state.reminder = { text: t, hour: h, minute: mi };
+            if (window.BFJson && BFJson.reminder) BFJson.reminder(t, h, mi);
+            saveToLocalStorage(); updateReminderStatus();
+            showAlert(`Напоминание: ежедневно ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`);
+        });
+    });
+}
 function bindSearch() {
     const hs = document.getElementById('history-search');
     if (hs) hs.addEventListener('input', e => {
@@ -2003,10 +2172,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (box) box.addEventListener('click', () => { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = e => handleAvatar(inp); inp.click(); });
     const dk = document.getElementById('set-dark-theme');
     if (dk) { dk.checked = state.darkTheme; dk.addEventListener('change', toggleDarkTheme); }
-    document.querySelectorAll('.history-filter-btn').forEach(b => {
+    document.querySelectorAll('#history-filters .history-filter-btn').forEach(b => {
         b.addEventListener('click', () => {
             historyFilter = b.dataset.filter;
-            document.querySelectorAll('.history-filter-btn').forEach(x => x.classList.toggle('active', x === b));
+            document.querySelectorAll('.history-filter-btn').forEach(x => x.classList.toggle('active', x.dataset.filter === historyFilter));
             updateUI();
         });
     });
@@ -2030,6 +2199,9 @@ window.addEventListener('load', () => {
     }
     const pushCb = document.getElementById('set-push'); if (pushCb) pushCb.checked = state.pushEnabled !== false;
     const vibCb = document.getElementById('set-vibrate'); if (vibCb) vibCb.checked = state.vibrateEnabled !== false;
+    const hbCb = document.getElementById('set-hide-balance'); if (hbCb) hbCb.checked = !!state.hideBalance;
+    updatePinStatus(); updateReminderStatus(); renderHistoryCats();
+    if (state.pin) setTimeout(showPinLock, 400);
     setTimeout(checkUpdates, 5000);   /* проверка новых версий на GitHub */
 });
 window.addEventListener('resize', () => { if (tutActive) renderTutStep(); });

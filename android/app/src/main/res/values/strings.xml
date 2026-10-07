@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">BankFake</string>
     <string name="widget_description">Баланс, курсы валют и цель копилки BankFake</string>
+    <string name="widget_rates_description">Курсы валют ЦБ в BankFake</string>
+    <string name="widget_goals_description">Прогресс ваших целей и копилок BankFake</string>
 </resources>

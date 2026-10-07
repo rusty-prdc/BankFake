@@ -254,6 +254,30 @@ public class MainActivity extends Activity {
             BankFakeWidget.setText(getApplicationContext(), balance, sub);
         }
 
+        /** Виджет «Курсы валют». */
+        @JavascriptInterface
+        public void widgetRates(String l1, String l2) {
+            RatesWidget.setText(getApplicationContext(), l1, l2);
+        }
+
+        /** Виджет «Цели». */
+        @JavascriptInterface
+        public void widgetGoals(String l1, String l2) {
+            GoalsWidget.setText(getApplicationContext(), l1, l2);
+        }
+
+        /** Ежедневное напоминание о платеже в ЧЧ:ММ. */
+        @JavascriptInterface
+        public void reminder(String text, int hour, int minute) {
+            ReminderAlarm.schedule(getApplicationContext(), text, hour, minute);
+        }
+
+        /** Выключить напоминание о платеже. */
+        @JavascriptInterface
+        public void reminderOff() {
+            ReminderAlarm.cancel(getApplicationContext());
+        }
+
         /** Открыть внешнюю ссылку (RuStore, скачивание APK) в браузере/магазине. */
         @JavascriptInterface
         public void openLink(String url) {

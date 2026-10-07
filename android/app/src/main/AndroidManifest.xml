@@ -39,9 +39,38 @@
                 android:resource="@xml/widget_bankfake_info" />
         </receiver>
 
+        <!-- Виджет «Курсы валют» -->
+        <receiver
+            android:name=".RatesWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_rates_info" />
+        </receiver>
+
+        <!-- Виджет «Цели» (копилки) -->
+        <receiver
+            android:name=".GoalsWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_goals_info" />
+        </receiver>
+
         <!-- Утренний брифинг: ежедневное уведомление (~9:00) -->
         <receiver
             android:name=".BriefingAlarm$Receiver"
+            android:exported="false" />
+
+        <!-- Напоминание о платеже: ежедневное уведомление в своё время -->
+        <receiver
+            android:name=".ReminderAlarm$Receiver"
             android:exported="false" />
 
         <!-- Отдаёт скачанный APK установщику Android (автообновление) -->

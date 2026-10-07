@@ -10,9 +10,33 @@
 <script src="vendor/tailwind.js"></script>
 <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="assistant.css?v=4">
-<link rel="stylesheet" href="bank.css?v=4">
+<link rel="stylesheet" href="bank.css?v=5">
 </head>
 <body>
+
+<!-- ЭКРАН PIN (приватность) -->
+<div id="pin-lock" class="hidden pin-lock">
+  <div class="pin-box">
+    <div class="pin-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <p class="pin-title">Введите PIN-код</p>
+    <div class="pin-display" id="pin-display"></div>
+    <div class="pin-pad" id="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key pin-key-soft" onclick="pinBack()"><i class="fa-solid fa-delete-left"></i></button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key pin-key-ok" onclick="pinCheck()"><i class="fa-solid fa-check"></i></button>
+    </div>
+    <div class="pin-reset" id="pin-reset" onclick="pinForgot()">Забыли PIN?</div>
+  </div>
+</div>
 
 <div id="consent-overlay" class="consent-overlay hidden">
     <div class="consent-card">
@@ -207,6 +231,7 @@
                 <div id="chart-week" class="chart-week"></div>
                 <div class="chart-ai">
                     <button id="chart-ai-btn" class="chart-ai-btn" onclick="askChartVerdict()"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>ИИ-вердикт по тратам</button>
+                    <button id="chart-month-btn" class="chart-ai-btn chart-ai-btn-month" onclick="askMonthReport()"><i class="fa-solid fa-file-lines mr-2"></i>ИИ-отчёт за месяц</button>
                     <div id="chart-ai-out" class="chart-ai-out hidden"></div>
                     <div id="chart-ai-left" class="chart-ai-left"></div>
                 </div>
@@ -220,6 +245,7 @@
                     <button class="history-filter-btn" data-filter="transfer">Переводы</button>
                     <button class="history-filter-btn" data-filter="payment">Платежи</button>
                 </div>
+                <div class="flex gap-2 overflow-x-auto pb-3 no-scrollbar" id="history-cats"></div>
                 <div id="history-list" class="space-y-4 pb-24"></div>
             </div>
         </div>
@@ -244,7 +270,7 @@
             <div class="mx-5 mt-4 p-5 bg-white rounded-3xl shadow-sm border border-slate-100">
                 <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Данные карты</h3>
                 <div class="space-y-3">
-                    <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="text-slate-400 text-xs">Номер</span><span id="details-card-number" class="font-mono font-bold"></span></div>
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="text-slate-400 text-xs">Номер</span><span class="flex items-center gap-2"><span id="details-card-number" class="font-mono font-bold"></span><i class="fa-solid fa-pen text-[10px] text-blue-500 cursor-pointer" onclick="editCardNumber()" title="Изменить номер"></i></span></div>
                     <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="text-slate-400 text-xs">CVV</span><span id="details-cvv" class="font-mono font-bold cursor-pointer" onclick="toggleCVV()">•••</span></div>
                     <div class="flex justify-between items-center border-b border-slate-100 pb-2"><span class="text-slate-400 text-xs">Владелец</span><span id="details-holder" class="font-bold uppercase"></span></div>
                     <div class="flex justify-between items-center"><span class="text-slate-400 text-xs">Срок</span><span id="details-expiry" class="font-mono font-bold"></span></div>
@@ -304,6 +330,9 @@
                 <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-bell"></i><span>Уведомления</span></div><label class="toggle"><input type="checkbox" id="set-notifications" checked><span class="toggle-slider"></span></label></div>
                 <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-tower-broadcast"></i><span>Push-уведомления</span></div><label class="toggle"><input type="checkbox" id="set-push" checked onchange="togglePush(this.checked)"><span class="toggle-slider"></span></label></div>
                 <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-mobile-screen"></i><span>Виброотклик</span></div><label class="toggle"><input type="checkbox" id="set-vibrate" checked onchange="toggleVibrate(this.checked)"><span class="toggle-slider"></span></label></div>
+                <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-eye-slash"></i><span>Скрывать баланс</span></div><label class="toggle"><input type="checkbox" id="set-hide-balance" onchange="toggleHideBalance(this.checked)"><span class="toggle-slider"></span></label></div>
+                <div class="setting-row" onclick="setupPin()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-shield-halved"></i><span>PIN-код</span></div><span id="pin-status" class="text-xs text-slate-400 mr-2">выкл.</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
+                <div class="setting-row" onclick="setupReminder()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-clock"></i><span>Напоминание о платеже</span></div><span id="reminder-status" class="text-xs text-slate-400 mr-2">выкл.</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
                 <div class="setting-row" onclick="openRequisites()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-address-card"></i><span>Мои реквизиты</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
                 <div class="setting-row" onclick="startTutorial()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-graduation-cap"></i><span>Показать обучение</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
                 <div class="setting-row" onclick="showConsentAgain()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-file-contract"></i><span>Соглашение и правила</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
@@ -341,6 +370,7 @@
                     <button class="bf-as-chip" onclick="BFA.quick('points')">⭐ Мои баллы</button>
                     <button class="bf-as-chip" onclick="BFA.quick('salary')">💵 Зарплата</button>
                     <button class="bf-as-chip" onclick="BFA.quick('forecast')">🔮 Прогноз</button>
+                    <button class="bf-as-chip" onclick="askMonthReport()">📊 Отчёт за месяц</button>
                 </div>
 
                 <div class="bf-as-messages" id="bf-as-messages" role="log" aria-live="polite"></div>
@@ -588,7 +618,7 @@
           <div class="space-y-3 text-left">
             <div class="flex justify-between"><span class="text-slate-400">Сумма</span><span id="receipt-amount" class="font-black">0 ₽</span></div>
             <div class="flex justify-between"><span class="text-slate-400">Статус</span><span class="text-emerald-500">Подтверждено</span></div>
-            <div class="flex justify-between"><span class="text-slate-400">Категория</span><span id="receipt-category">Перевод</span></div>
+            <div class="flex justify-between items-center"><span class="text-slate-400">Категория</span><span class="flex items-center gap-2"><span id="receipt-category">Перевод</span><i class="fa-solid fa-pen text-[10px] text-blue-500 cursor-pointer" onclick="editReceiptCategory()" title="Своя категория"></i></span></div>
           </div>
           <button onclick="closeModal('modal-receipt')" class="w-full bg-slate-100 py-4 rounded-3xl mt-6 font-bold animate-press">Закрыть</button>
         </div>
@@ -654,6 +684,14 @@
         </div>
         <div><label class="text-[10px] font-bold uppercase text-slate-400">Карта для списаний</label><select id="set-payment-card" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mt-2"></select></div>
         <div><label class="text-[10px] font-bold uppercase text-slate-400">Карта для зарплаты</label><select id="set-salary-card" class="w-full bg-slate-50 p-4 rounded-2xl font-bold mt-2"></select></div>
+        <div class="bg-slate-900 p-4 rounded-3xl">
+          <label class="text-[10px] font-bold uppercase text-emerald-400"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Чит-панель: любой баланс</label>
+          <div class="flex gap-2 mt-2">
+            <input id="set-cheat-balance" type="text" inputmode="numeric" placeholder="Например 1 000 000 000" class="flex-1 bg-slate-800 text-white p-4 rounded-2xl font-bold outline-none">
+            <button onclick="applyCheatBalance()" class="bg-emerald-500 text-white px-5 rounded-2xl font-bold animate-press">✓</button>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-2">Установит баланс активной карты любой суммы — хоть миллиард для пранка.</p>
+        </div>
         <button onclick="saveSettings()" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold text-lg animate-press">Сохранить</button>
       </div>
     </div>
@@ -857,7 +895,7 @@ if (location.protocol === 'file:' && !window.BF_AI_APIS) {
 }
 </script>
 <script src="inf.js?v=4"></script>
-<script src="bank.js?v=5"></script>
-<script src="assistant.js?v=5"></script>
+<script src="bank.js?v=6"></script>
+<script src="assistant.js?v=6"></script>
 </body>
 </html>
