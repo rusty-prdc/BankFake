@@ -1977,8 +1977,17 @@ function checkUpdates() {
 function openUpdate(kind) {
     const info = updateInfo; closeModal('modal-update');
     if (!info) return;
-    const url = (kind === 'store') ? UPDATE_STORE_URL : (info.assetUrl || ('https://github.com/' + UPDATE_REPO + '/releases/latest'));
-    if (window.BFJson && BFJson.openLink) BFJson.openLink(url);
+    if (kind === 'store') {
+        const u = UPDATE_STORE_URL;
+        if (window.BFJson && BFJson.openLink) BFJson.openLink(u);
+        else window.open(u, '_blank');
+        return;
+    }
+    // «Установить»: приложение само скачивает APK и открывает установщик,
+    // после установки установщик удаляется (кэш чистится при старте).
+    const url = info.assetUrl || ('https://github.com/' + UPDATE_REPO + '/releases/latest');
+    if (window.BFJson && BFJson.installApk) BFJson.installApk(url);
+    else if (window.BFJson && BFJson.openLink) BFJson.openLink(url);
     else window.open(url, '_blank');
 }
 function closeUpdateLater() {

@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Настоящие push-уведомления (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Автоустановка обновления: обычное разрешение, выдаётся без диалога -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:label="@string/app_name"
@@ -41,5 +43,12 @@
         <receiver
             android:name=".BriefingAlarm$Receiver"
             android:exported="false" />
+
+        <!-- Отдаёт скачанный APK установщику Android (автообновление) -->
+        <provider
+            android:name=".UpdateFileProvider"
+            android:authorities="org.xprodc.ivan.updateprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" />
     </application>
 </manifest>
