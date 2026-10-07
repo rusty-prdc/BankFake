@@ -124,8 +124,9 @@
         function next(i) {
             if (i >= candidates.length) {
                 stateUI.probing = false;
-                stateUI.base = '';   // fallback: адрес относительно текущей страницы
-                return Promise.resolve(stateUI.base);
+                // Провал НЕ кэшируем: следующая попытка снова проходит по адресам,
+                // иначе после одного сбоя связи ИИ «умрёт» до перезагрузки страницы.
+                return Promise.resolve('');
             }
             return probe(candidates[i]).then(function (ok) {
                 stateUI.probing = false;
@@ -384,6 +385,7 @@
             if (res.body && res.body.ok && res.body.message) return { ok: true, text: res.body.message };
             return { ok: false, error: errorMessage(res) };
         }).catch(function () {
+            stateUI.base = null;   // сбрасываем адрес — вдруг backend переехал
             return { ok: false, error: MSG_ERROR };
         });
     }
