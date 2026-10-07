@@ -1862,7 +1862,7 @@ function drawExpensesChart() {
     renderWeekBars(); updateAILimitUI();
     if (!expenses.length) { ctx.clearRect(0, 0, canvas.width, canvas.height); legend.innerHTML = '<span class="text-slate-400">Нет данных</span>'; return; }
     const cats = {};
-    expenses.forEach(e => { const c = getCategoryFromTitle(e.title); cats[c] = (cats[c] || 0) + e.amount; });
+    expenses.forEach(e => { const c = e.cat || getCategoryFromTitle(e.title); cats[c] = (cats[c] || 0) + e.amount; });
     const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
     const total = sorted.reduce((s, [, v]) => s + v, 0);
     let a0 = -Math.PI / 2; legend.innerHTML = '';
