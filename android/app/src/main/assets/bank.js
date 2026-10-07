@@ -1621,6 +1621,9 @@ function switchTab(t) {
 }
 function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
+/* ===================== ПОМОЩЬ: ВИДЖЕТЫ НА ЭКРАНЕ ===================== */
+function openWidgetsHelp() { document.getElementById('modal-widgets-help')?.classList.remove('hidden'); vibrate(15); }
+
 /* ===================== НАСТРОЙКИ ===================== */
 function openSettings() {
     document.getElementById('set-name').value = state.name;

@@ -10,7 +10,7 @@
 <script src="vendor/tailwind.js"></script>
 <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
 <link rel="stylesheet" href="assistant.css?v=4">
-<link rel="stylesheet" href="bank.css?v=5">
+<link rel="stylesheet" href="bank.css?v=6">
 </head>
 <body>
 
@@ -333,6 +333,7 @@
                 <div class="setting-row"><div class="setting-left"><i class="fa-solid fa-eye-slash"></i><span>Скрывать баланс</span></div><label class="toggle"><input type="checkbox" id="set-hide-balance" onchange="toggleHideBalance(this.checked)"><span class="toggle-slider"></span></label></div>
                 <div class="setting-row" onclick="setupPin()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-shield-halved"></i><span>PIN-код</span></div><span id="pin-status" class="text-xs text-slate-400 mr-2">выкл.</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
                 <div class="setting-row" onclick="setupReminder()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-clock"></i><span>Напоминание о платеже</span></div><span id="reminder-status" class="text-xs text-slate-400 mr-2">выкл.</span><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
+                <div class="setting-row" id="row-widgets-help" onclick="openWidgetsHelp()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-object-group"></i><span>Виджеты на экране</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
                 <div class="setting-row" onclick="openRequisites()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-address-card"></i><span>Мои реквизиты</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
                 <div class="setting-row" onclick="startTutorial()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-graduation-cap"></i><span>Показать обучение</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
                 <div class="setting-row" onclick="showConsentAgain()" style="cursor:pointer;"><div class="setting-left"><i class="fa-solid fa-file-contract"></i><span>Соглашение и правила</span></div><i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i></div>
@@ -625,6 +626,44 @@
       </div>
     </div>
 
+    <div id="modal-widgets-help" class="hidden modal-overlay">
+      <div class="modal-card" style="max-height:82vh; overflow-y:auto;">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="text-lg font-bold"><i class="fa-solid fa-object-group text-emerald-500 mr-2"></i>Виджеты на экране</h3>
+          <i onclick="closeModal('modal-widgets-help')" class="fa-solid fa-xmark text-slate-400 p-1 text-lg cursor-pointer"></i>
+        </div>
+        <p class="text-xs text-slate-400 mb-4">Три виджета BankFake: <b>Баланс</b>, <b>Курсы валют</b>, <b>Цели</b>. Порядок действий зависит от телефона.</p>
+
+        <div class="wh-help-brand">
+          <div class="wh-help-name"><i class="fa-solid fa-mobile-screen"></i> Samsung (One UI)</div>
+          <ol><li>Долго нажмите на пустое место рабочего стола</li><li>Внизу нажмите «Виджеты»</li><li>Найдите BankFake → выберите виджет → «Добавить»</li></ol>
+        </div>
+        <div class="wh-help-brand">
+          <div class="wh-help-name"><i class="fa-solid fa-mobile-screen"></i> Xiaomi, Redmi, Poco (MIUI / HyperOS)</div>
+          <ol><li>Долгое нажатие на пустом месте экрана (или щипок двумя пальцами)</li><li>Снизу нажмите «Виджеты»</li><li>BankFake → нажмите на виджет → «Добавить»</li></ol>
+        </div>
+        <div class="wh-help-brand">
+          <div class="wh-help-name"><i class="fa-solid fa-mobile-screen"></i> Huawei, Honor (EMUI / MagicOS)</div>
+          <ol><li>Долгое нажатие на пустом месте рабочего стола</li><li>Нажмите «Виджеты»</li><li>BankFake → выберите размер → «Готово»</li></ol>
+        </div>
+        <div class="wh-help-brand">
+          <div class="wh-help-name"><i class="fa-solid fa-mobile-screen"></i> Pixel, чистый Android, Motorola, Nokia</div>
+          <ol><li>Долгое нажатие на пустом месте рабочего стола</li><li>Нажмите «Виджеты»</li><li>Прокрутите до BankFake → нажмите и удерживайте виджет → перетащите на экран</li></ol>
+        </div>
+        <div class="wh-help-brand">
+          <div class="wh-help-name"><i class="fa-solid fa-mobile-screen"></i> Oppo, Realme, OnePlus (ColorOS / OxygenOS)</div>
+          <ol><li>Долгое нажатие на пустом месте или щипок пальцами</li><li>Нажмите значок виджетов / «Виджеты»</li><li>BankFake → «Добавить»</li></ol>
+        </div>
+        <div class="wh-help-brand">
+          <div class="wh-help-name"><i class="fa-solid fa-mobile-screen"></i> Meizu, другие (Flyme и прочее)</div>
+          <ol><li>Долгое нажатие на рабочем столе → «Виджеты»</li><li>BankFake → удерживайте виджет и перетащите</li></ol>
+        </div>
+
+        <div class="wh-help-tip"><b>Если виджета нет в списке:</b> откройте BankFake один раз и повторите. <b>Не появляется после установки?</b> Перезагрузите рабочий стол (выключите и включите телефон). Обновление данных — раз в 30 минут, тап по виджету открывает приложение.</div>
+        <button onclick="closeModal('modal-widgets-help')" class="w-full bg-slate-900 text-white py-4 rounded-3xl mt-4 font-bold animate-press">Понятно</button>
+      </div>
+    </div>
+
     <div id="modal-card-transfer" class="hidden modal-overlay">
       <div class="modal-card">
         <h3 class="text-xl font-bold mb-4">Перевод между картами</h3>
@@ -894,8 +933,8 @@ if (location.protocol === 'file:' && !window.BF_AI_APIS) {
   } catch (e) {}
 }
 </script>
-<script src="inf.js?v=4"></script>
-<script src="bank.js?v=6"></script>
+<script src="inf.js?v=5"></script>
+<script src="bank.js?v=7"></script>
 <script src="assistant.js?v=6"></script>
 </body>
 </html>
